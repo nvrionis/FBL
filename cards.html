@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bridge Match Cards – WBF VP Scale</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg-page: #f3f4f6;
+      --bg-card: #ffffff;
+      --border-subtle: #e5e7eb;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --accent-neutral: #9ca3af;
+
+      --team-a-color: #4F46E5; /* left team */
+      --team-b-color: #F97316; /* right team */
+
+      --status-not-started: #9ca3af;
+      --status-in-play: #f97316;
+      --status-final: #16a34a;
+    }
+
+    body {
+      margin: 0;
+      padding: 12px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg-page);
+      color: var(--text-main);
+    }
+
+    .page-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    /* CARD */
+
+    .match-card {
+      background: var(--bg-card);
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 10px;
+      transition: box-shadow 0.15s ease, border-color 0.15s ease;
+    }
+
+    .match-card.lead-a,
+    .match-card.lead-b {
+      box-shadow: 0 3px 10px rgba(15,23,42,0.12);
+    }
+
+    /* HEADER */
+
+    .match-header {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) auto minmax(0, 1.2fr);
+      align-items: center;
+      gap: 6px;
+    }
+
+    .team {
+      min-width: 0;
+    }
+
+    .team-a {
+      text-align: left;
+    }
+
+    .team-b {
+      text-align: right;
+    }
+
+    .team-name {
+      font-size: 15px;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .team-a .team-name {
+      color: var(--team-a-color);
+    }
+
+    .team-b .team-name {
+      color: var(--team-b-color);
+    }
+
+    .team-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .team-vp {
+      margin-top: 2px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .team-a .team-vp {
+      color: var(--team-a-color);
+    }
+
+    .team-b .team-vp {
+      color: var(--team-b-color);
+    }
+
+    .match-center {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .match-status {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-weight: 500;
+      border: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+      background: #f9fafb;
+    }
+
+    .match-status-not_started {
+      color: var(--status-not-started);
+      border-color: transparent;
+      background: rgba(156,163,175,0.15);
+    }
+
+    .match-status-in_play {
+      color: #fff;
+      background: var(--status-in-play);
+      border-color: transparent;
+    }
+
+    .match-status-final {
+      color: #fff;
+      background: var(--status-final);
+      border-color: transparent;
+      cursor: pointer;          /* clickable to show boards */
+    }
+
+    .match-status-final:active {
+      transform: scale(0.97);
+    }
+
+    .match-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* MAIN CENTER AREA */
+
+    .imp-main-row {
+      display: flex;
+      justify-content: center;
+    }
+
+    .imp-center-display {
+      text-align: center;
+    }
+
+    .imp-value {
+      font-size: 28px;
+      font-weight: 700;
+      line-height: 1.1;
+    }
+
+    .match-card.lead-a .imp-value {
+      color: var(--team-a-color);
+    }
+
+    .match-card.lead-b .imp-value {
+      color: var(--team-b-color);
+    }
+
+    .match-card.tie .imp-value {
+      color: var(--text-main);
+    }
+
+    .imp-label-main {
+      font-size: 13px;
+      color: var(--text-main);
+      margin-top: 2px;
+    }
+
+    .imp-label-sub {
+      margin-top: 4px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .imp-label-sub-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: #f3f4f6;
+    }
+
+    .imp-label-sub-good {
+      background: rgba(22,163,74,0.08);
+      color: #15803d;
+    }
+
+    .imp-label-sub-bad {
+      background: rgba(239,68,68,0.08);
+      color: #b91c1c;
+    }
+
+    .imp-label-sub-muted {
+      background: #f3f4f6;
+      color: var(--text-muted);
+    }
+
+    /* BAR + SLIDER ROW */
+
+    .imp-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .imp-arrow {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: #f9fafb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .imp-arrow:active {
+      transform: scale(0.95);
+    }
+
+    .imp-arrow-left {
+      border-color: rgba(79,70,229,0.35);
+      color: var(--team-a-color);
+      background: rgba(79,70,229,0.06);
+    }
+
+    .imp-arrow-right {
+      border-color: rgba(249,115,22,0.35);
+      color: var(--team-b-color);
+      background: rgba(249,115,22,0.06);
+    }
+
+    .imp-track-wrapper {
+      position: relative;
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    /* colored bar */
+
+    .imp-bar {
+      position: relative;
+      height: 8px;
+      border-radius: 999px;
+      background: #e5e7eb;
+      overflow: hidden;
+    }
+
+    .imp-bar-fill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      width: 50%;
+      transform: scaleX(0);
+    }
+
+    .imp-bar-fill-a {
+      left: 0;
+      right: 50%;
+      background: rgba(79,70,229,0.95);
+      transform-origin: right center;
+    }
+
+    .imp-bar-fill-b {
+      right: 0;
+      left: 50%;
+      background: rgba(249,115,22,0.95);
+      transform-origin: left center;
+    }
+
+    .imp-bar-center {
+      position: absolute;
+      top: -2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(148,163,184,0.9);
+    }
+
+    /* markers & diff line for final */
+
+    .imp-bar-marker {
+      position: absolute;
+      top: 50%;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    .imp-bar-marker-pred {
+      border: 2px solid var(--accent-neutral);
+      background: #ffffff;
+      box-shadow: 0 0 0 1px rgba(148,163,184,0.4);
+    }
+
+    .imp-bar-marker-actual {
+      border: 2px solid #ffffff;
+      background: #111827;
+      box-shadow: 0 0 0 1px rgba(15,23,42,0.45);
+    }
+
+    .imp-bar-diff-line {
+      position: absolute;
+      top: 50%;
+      height: 2px;
+      border-radius: 999px;
+      background: rgba(15,23,42,0.4);
+      transform: translateY(-50%);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s ease;
+    }
+
+    /* slider */
+
+    .imp-slider {
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      background: transparent;
+      margin-top: 4px;
+    }
+
+    .imp-slider:focus {
+      outline: none;
+    }
+
+    .imp-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 2px solid var(--accent-neutral);
+      box-shadow: 0 0 0 2px rgba(148,163,184,0.35);
+      cursor: pointer;
+    }
+
+    .imp-slider::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      background: #ffffff;
+      border: 2px solid var(--accent-neutral);
+      cursor: pointer;
+    }
+
+    .imp-slider::-webkit-slider-runnable-track {
+      height: 8px;
+      border-radius: 999px;
+      background: transparent;
+    }
+
+    .imp-slider::-moz-range-track {
+      height: 8px;
+      border-radius: 999px;
+      background: transparent;
+    }
+
+    .match-card.lead-a .imp-slider::-webkit-slider-thumb {
+      border-color: var(--team-a-color);
+    }
+
+    .match-card.lead-b .imp-slider::-webkit-slider-thumb {
+      border-color: var(--team-b-color);
+    }
+
+    .match-card.lead-a .imp-slider::-moz-range-thumb {
+      border-color: var(--team-a-color);
+    }
+
+    .match-card.lead-b .imp-slider::-moz-range-thumb {
+      border-color: var(--team-b-color);
+    }
+
+    /* Legends */
+
+    .imp-legends {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .imp-legend-left {
+      color: var(--team-a-color);
+    }
+
+    .imp-legend-right {
+      color: var(--team-b-color);
+    }
+
+    /* MILESTONES: every 10 up to 50 */
+
+    .imp-milestones-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 2px;
+      margin-top: 4px;
+    }
+
+    .imp-milestone {
+      flex: 1 1 auto;
+      max-width: 34px;
+      height: 22px;
+      border-radius: 999px;
+      border: 1px solid transparent;
+      background: transparent;
+      font-size: 10px;
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .imp-milestone span {
+      pointer-events: none;
+    }
+
+    .imp-milestone:hover {
+      border-color: var(--border-subtle);
+      background: #f9fafb;
+    }
+
+    /* FOOTER */
+
+    .match-footer {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .match-footer.centered {
+      justify-content: center;
+    }
+
+    .match-footer-btn {
+      padding: 5px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border-subtle);
+      background: #f9fafb;
+      font-size: 11px;
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    /* LOCKED */
+
+    .match-card.is-locked .imp-slider {
+      opacity: 0.5;
+    }
+
+    .match-card.is-locked .imp-arrow,
+    .match-card.is-locked .imp-milestone {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    @media (min-width: 480px) {
+      body {
+        padding: 16px;
+      }
+
+      .match-card {
+        padding: 14px 16px 16px;
+        margin-bottom: 12px;
+      }
+
+      .team-name {
+        font-size: 16px;
+      }
+
+      .imp-value {
+        font-size: 32px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-title">Bridge Match Predictions</div>
+
+  <!-- EDITABLE PREDICTION CARD -->
+  <div class="match-card"
+       data-status="not_started"
+       data-pred-imp="0"
+       data-actual-imp="">
+    <div class="match-header">
+      <div class="team team-a">
+        <div class="team-name">Team A</div>
+        <div class="team-meta">Seed #1</div>
+        <div class="team-vp team-vp-a"></div>
+      </div>
+      <div class="match-center">
+        <div class="match-status match-status-not_started">Prediction</div>
+        <div class="match-meta">Round 3 · 18:00</div>
+      </div>
+      <div class="team team-b">
+        <div class="team-name">Team B</div>
+        <div class="team-meta">Seed #8</div>
+        <div class="team-vp team-vp-b"></div>
+      </div>
+    </div>
+
+    <div class="imp-main-row">
+      <div class="imp-center-display">
+        <div class="imp-value">0</div>
+        <div class="imp-label-main">Tie (0 IMPs)</div>
+        <div class="imp-label-sub"></div>
+      </div>
+    </div>
+
+    <div class="imp-bar-row">
+      <button class="imp-arrow imp-arrow-left" type="button" data-step="-1">◀</button>
+      <div class="imp-track-wrapper">
+        <div class="imp-bar">
+          <div class="imp-bar-fill imp-bar-fill-a"></div>
+          <div class="imp-bar-fill imp-bar-fill-b"></div>
+          <div class="imp-bar-center"></div>
+
+          <div class="imp-bar-diff-line"></div>
+          <div class="imp-bar-marker imp-bar-marker-pred"></div>
+          <div class="imp-bar-marker imp-bar-marker-actual"></div>
+        </div>
+        <input
+          class="imp-slider"
+          type="range"
+          min="-52"
+          max="52"
+          step="1"
+          value="0"
+          aria-label="Prediction IMP difference"
+        >
+        <div class="imp-legends">
+          <span class="imp-legend-left">Team A</span>
+          <span>0</span>
+          <span class="imp-legend-right">Team B</span>
+        </div>
+      </div>
+      <button class="imp-arrow imp-arrow-right" type="button" data-step="1">▶</button>
+    </div>
+
+    <!-- milestones: per 10 up to 50 -->
+    <div class="imp-milestones-row">
+      <button class="imp-milestone" type="button" data-value="-50"><span>50</span></button>
+      <button class="imp-milestone" type="button" data-value="-40"><span>40</span></button>
+      <button class="imp-milestone" type="button" data-value="-30"><span>30</span></button>
+      <button class="imp-milestone" type="button" data-value="-20"><span>20</span></button>
+      <button class="imp-milestone" type="button" data-value="-10"><span>10</span></button>
+      <button class="imp-milestone" type="button" data-value="0"><span>0</span></button>
+      <button class="imp-milestone" type="button" data-value="10"><span>10</span></button>
+      <button class="imp-milestone" type="button" data-value="20"><span>20</span></button>
+      <button class="imp-milestone" type="button" data-value="30"><span>30</span></button>
+      <button class="imp-milestone" type="button" data-value="40"><span>40</span></button>
+      <button class="imp-milestone" type="button" data-value="50"><span>50</span></button>
+    </div>
+
+    <input type="hidden" class="imp-hidden-input" name="predicted_imp_diff" value="0">
+
+    <div class="match-footer">
+      <button class="match-footer-btn" type="button">Roster</button>
+      <button class="match-footer-btn" type="button">Schedule</button>
+    </div>
+  </div>
+
+  <!-- FINISHED CARD -->
+  <div class="match-card"
+       data-status="final"
+       data-pred-imp="-8"
+       data-actual-imp="-12">
+    <div class="match-header">
+      <div class="team team-a">
+        <div class="team-name">Team C</div>
+        <div class="team-meta">Seed #2</div>
+        <div class="team-vp team-vp-a"></div>
+      </div>
+      <div class="match-center">
+        <div class="match-status match-status-final">Finished</div>
+        <div class="match-meta">Round 2 · 12 boards</div>
+      </div>
+      <div class="team team-b">
+        <div class="team-name">Team D</div>
+        <div class="team-meta">Seed #5</div>
+        <div class="team-vp team-vp-b"></div>
+      </div>
+    </div>
+
+    <div class="imp-main-row">
+      <div class="imp-center-display">
+        <div class="imp-value">0</div>
+        <div class="imp-label-main">Your score</div>
+        <div class="imp-label-sub"></div>
+      </div>
+    </div>
+
+    <div class="imp-bar-row">
+      <button class="imp-arrow imp-arrow-left" type="button" data-step="-1">◀</button>
+      <div class="imp-track-wrapper">
+        <div class="imp-bar">
+          <div class="imp-bar-fill imp-bar-fill-a"></div>
+          <div class="imp-bar-fill imp-bar-fill-b"></div>
+          <div class="imp-bar-center"></div>
+
+          <div class="imp-bar-diff-line"></div>
+          <div class="imp-bar-marker imp-bar-marker-pred"></div>
+          <div class="imp-bar-marker imp-bar-marker-actual"></div>
+        </div>
+        <input
+          class="imp-slider"
+          type="range"
+          min="-52"
+          max="52"
+          step="1"
+          value="-8"
+          aria-label="Prediction IMP difference"
+        >
+        <div class="imp-legends">
+          <span class="imp-legend-left">Team C</span>
+          <span>0</span>
+          <span class="imp-legend-right">Team D</span>
+        </div>
+      </div>
+      <button class="imp-arrow imp-arrow-right" type="button" data-step="1">▶</button>
+    </div>
+
+    <div class="imp-milestones-row">
+      <button class="imp-milestone" type="button" data-value="-50"><span>50</span></button>
+      <button class="imp-milestone" type="button" data-value="-40"><span>40</span></button>
+      <button class="imp-milestone" type="button" data-value="-30"><span>30</span></button>
+      <button class="imp-milestone" type="button" data-value="-20"><span>20</span></button>
+      <button class="imp-milestone" type="button" data-value="-10"><span>10</span></button>
+      <button class="imp-milestone" type="button" data-value="0"><span>0</span></button>
+      <button class="imp-milestone" type="button" data-value="10"><span>10</span></button>
+      <button class="imp-milestone" type="button" data-value="20"><span>20</span></button>
+      <button class="imp-milestone" type="button" data-value="30"><span>30</span></button>
+      <button class="imp-milestone" type="button" data-value="40"><span>40</span></button>
+      <button class="imp-milestone" type="button" data-value="50"><span>50</span></button>
+    </div>
+
+    <input type="hidden" class="imp-hidden-input" name="predicted_imp_diff" value="-8">
+
+    <div class="match-footer centered">
+      <button class="match-footer-btn" type="button">Boards</button>
+    </div>
+  </div>
+
+  <script>
+    // Exact WBF 12-board VP scale (short triangle)
+    const WBF_12_WIN = [
+      10.00, //0
+      10.36, //1
+      10.71, //2
+      11.05, //3
+      11.38, //4
+      11.70, //5
+      12.01, //6
+      12.31, //7
+      12.61, //8
+      12.90, //9
+      13.18, //10
+      13.45, //11
+      13.71, //12
+      13.97, //13
+      14.22, //14
+      14.46, //15
+      14.70, //16
+      14.93, //17
+      15.15, //18
+      15.37, //19
+      15.58, //20
+      15.79, //21
+      15.99, //22
+      16.18, //23
+      16.37, //24
+      16.55, //25
+      16.73, //26
+      16.91, //27
+      17.08, //28
+      17.24, //29
+      17.40, //30
+      17.56, //31
+      17.71, //32
+      17.86, //33
+      18.00, //34
+      18.14, //35
+      18.28, //36
+      18.41, //37
+      18.54, //38
+      18.66, //39
+      18.78, //40
+      18.90, //41
+      19.02, //42
+      19.13, //43
+      19.24, //44
+      19.34, //45
+      19.44, //46
+      19.54, //47
+      19.64, //48
+      19.74, //49
+      19.83, //50
+      19.92, //51
+      20.00  //52
+    ];
+
+    const WBF_12_LOSS = [
+      10.00, //0
+      9.64,  //1
+      9.29,  //2
+      8.95,  //3
+      8.62,  //4
+      8.30,  //5
+      7.99,  //6
+      7.69,  //7
+      7.39,  //8
+      7.10,  //9
+      6.82,  //10
+      6.55,  //11
+      6.29,  //12
+      6.03,  //13
+      5.78,  //14
+      5.54,  //15
+      5.30,  //16
+      5.07,  //17
+      4.85,  //18
+      4.63,  //19
+      4.42,  //20
+      4.21,  //21
+      4.01,  //22
+      3.82,  //23
+      3.63,  //24
+      3.45,  //25
+      3.27,  //26
+      3.09,  //27
+      2.92,  //28
+      2.76,  //29
+      2.60,  //30
+      2.44,  //31
+      2.29,  //32
+      2.14,  //33
+      2.00,  //34
+      1.86,  //35
+      1.72,  //36
+      1.59,  //37
+      1.46,  //38
+      1.34,  //39
+      1.22,  //40
+      1.10,  //41
+      0.98,  //42
+      0.87,  //43
+      0.76,  //44
+      0.66,  //45
+      0.56,  //46
+      0.46,  //47
+      0.36,  //48
+      0.26,  //49
+      0.17,  //50
+      0.08,  //51
+      0.00   //52
+    ];
+
+    function convertImpsToVP12Boards(impDiff) {
+      const d = Math.abs(impDiff);
+      let idx = Math.round(d);
+      if (idx > 52) idx = 52;
+      return [WBF_12_WIN[idx], WBF_12_LOSS[idx]];
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.querySelectorAll(".match-card").forEach(initMatchCard);
+    });
+
+    function initMatchCard(card) {
+      const slider = card.querySelector(".imp-slider");
+      const valueEl = card.querySelector(".imp-value");
+      const labelMain = card.querySelector(".imp-label-main");
+      const labelSub = card.querySelector(".imp-label-sub");
+      const fillA = card.querySelector(".imp-bar-fill-a");
+      const fillB = card.querySelector(".imp-bar-fill-b");
+      const diffLine = card.querySelector(".imp-bar-diff-line");
+      const markerPred = card.querySelector(".imp-bar-marker-pred");
+      const markerActual = card.querySelector(".imp-bar-marker-actual");
+      const hiddenInput = card.querySelector(".imp-hidden-input");
+      const arrows = card.querySelectorAll(".imp-arrow");
+      const milestones = card.querySelectorAll(".imp-milestone");
+      const statusPill = card.querySelector(".match-status-final");
+      const teamVpAEl = card.querySelector(".team-vp-a");
+      const teamVpBEl = card.querySelector(".team-vp-b");
+
+      if (!slider || !valueEl || !labelMain || !fillA || !fillB) return;
+
+      const status = card.dataset.status || "not_started";
+      const isEditable = status === "not_started";
+
+      const SLIDER_MIN = parseInt(slider.min, 10) || -52;
+      const SLIDER_MAX = parseInt(slider.max, 10) || 52;
+
+      function clamp(val) {
+        return Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, val));
+      }
+
+      const teamALabel =
+        (card.querySelector(".team-a .team-name")?.textContent || "Team A").trim();
+      const teamBLabel =
+        (card.querySelector(".team-b .team-name")?.textContent || "Team B").trim();
+
+      let predictionDiff = 0;
+      if (card.dataset.predImp !== undefined && card.dataset.predImp !== "") {
+        const tmp = parseInt(card.dataset.predImp, 10);
+        if (!isNaN(tmp)) predictionDiff = tmp;
+      } else {
+        const tmp = parseInt(slider.value, 10);
+        if (!isNaN(tmp)) predictionDiff = tmp;
+      }
+      predictionDiff = clamp(predictionDiff);
+
+      let actualDiff = null;
+      if (card.dataset.actualImp !== undefined && card.dataset.actualImp !== "") {
+        const tmp = parseInt(card.dataset.actualImp, 10);
+        if (!isNaN(tmp)) actualDiff = tmp;
+      }
+
+      function updateTeamVP() {
+        if (status === "final" && actualDiff !== null && teamVpAEl && teamVpBEl) {
+          const abs = Math.abs(actualDiff);
+          const [winVP, loseVP] = convertImpsToVP12Boards(actualDiff);
+          if (actualDiff === 0) {
+            teamVpAEl.textContent = `${winVP.toFixed(2)} VP · 0 IMPs`;
+            teamVpBEl.textContent = `${winVP.toFixed(2)} VP · 0 IMPs`;
+          } else if (actualDiff < 0) {
+            // A wins
+            teamVpAEl.textContent = `${winVP.toFixed(2)} VP · +${abs} IMPs`;
+            teamVpBEl.textContent = `${loseVP.toFixed(2)} VP · -${abs} IMPs`;
+          } else {
+            // B wins
+            teamVpAEl.textContent = `${loseVP.toFixed(2)} VP · -${abs} IMPs`;
+            teamVpBEl.textContent = `${winVP.toFixed(2)} VP · +${abs} IMPs`;
+          }
+        } else {
+          if (teamVpAEl) teamVpAEl.textContent = "";
+          if (teamVpBEl) teamVpBEl.textContent = "";
+        }
+      }
+
+      function mainLabelForPrediction(diff) {
+        const abs = Math.abs(diff);
+        if (diff < 0) return `${teamALabel} by ${abs} IMPs`;
+        if (diff > 0) return `${teamBLabel} by ${abs} IMPs`;
+        return `Tie (0 IMPs)`;
+      }
+
+      function valueToPercent(val) {
+        const ratio = (val - SLIDER_MIN) / (SLIDER_MAX - SLIDER_MIN);
+        return Math.max(0, Math.min(100, ratio * 100));
+      }
+
+      function render() {
+        predictionDiff = clamp(predictionDiff);
+
+        const leadBasis = (actualDiff !== null ? actualDiff : predictionDiff);
+
+        labelSub.textContent = "";
+        labelSub.className = "imp-label-sub";
+
+        if (status === "final" && actualDiff !== null) {
+          const diffError = Math.abs(actualDiff - predictionDiff);
+          const [winnerVP_error, loserVP_error] = convertImpsToVP12Boards(diffError);
+          const userScoreVP = loserVP_error; // loser VP of the "error match"
+
+          // center: your VP score
+          valueEl.textContent = userScoreVP.toFixed(2);
+          labelMain.textContent = "Your score (VP)";
+
+          const absPred = Math.abs(predictionDiff);
+          const predText = predictionDiff === 0
+            ? "Tie (0 IMPs)"
+            : (predictionDiff < 0
+              ? `${teamALabel} +${absPred} IMPs`
+              : `${teamBLabel} +${absPred} IMPs`);
+
+          if (diffError === 0) {
+            labelSub.textContent =
+              `Spot on ✅ · ${predText} · Off by 0 IMPs`;
+            labelSub.classList.add("imp-label-sub-pill", "imp-label-sub-good");
+          } else {
+            labelSub.textContent =
+              `Prediction: ${predText} · Off by ${diffError} IMPs`;
+            labelSub.classList.add("imp-label-sub-pill", "imp-label-sub-bad");
+          }
+        } else {
+          // prediction mode
+          valueEl.textContent = Math.abs(predictionDiff).toString();
+          labelMain.textContent = mainLabelForPrediction(predictionDiff);
+          labelSub.textContent = "Slide, arrows or milestones to adjust.";
+          labelSub.classList.add("imp-label-sub-pill", "imp-label-sub-muted");
+        }
+
+        // card coloring based on winner (actual if available)
+        card.classList.remove("lead-a", "lead-b", "tie");
+        if (leadBasis < 0) card.classList.add("lead-a");
+        else if (leadBasis > 0) card.classList.add("lead-b");
+        else card.classList.add("tie");
+
+        // bar fill from center based on prediction
+        const absPred = Math.abs(predictionDiff);
+        const maxAbs = Math.max(Math.abs(SLIDER_MIN), Math.abs(SLIDER_MAX), 1);
+        const pctFill = Math.min(1, absPred / maxAbs);
+
+        if (predictionDiff < 0) {
+          fillA.style.transform = `scaleX(${pctFill})`;
+          fillB.style.transform = `scaleX(0)`;
+        } else if (predictionDiff > 0) {
+          fillA.style.transform = `scaleX(0)`;
+          fillB.style.transform = `scaleX(${pctFill})`;
+        } else {
+          fillA.style.transform = `scaleX(0)`;
+          fillB.style.transform = `scaleX(0)`;
+        }
+
+        // markers + diff line only in final
+        if (status === "final" && actualDiff !== null && markerPred && markerActual && diffLine) {
+          const predPct = valueToPercent(predictionDiff);
+          const actualPct = valueToPercent(actualDiff);
+
+          markerPred.style.left = `${predPct}%`;
+          markerActual.style.left = `${actualPct}%`;
+          markerPred.style.opacity = "1";
+          markerActual.style.opacity = "1";
+
+          if (predictionDiff !== actualDiff) {
+            const left = Math.min(predPct, actualPct);
+            const right = Math.max(predPct, actualPct);
+            diffLine.style.left = `${left}%`;
+            diffLine.style.width = `${right - left}%`;
+            diffLine.style.opacity = "1";
+          } else {
+            diffLine.style.opacity = "0";
+          }
+        } else {
+          if (markerPred) markerPred.style.opacity = "0";
+          if (markerActual) markerActual.style.opacity = "0";
+          if (diffLine) diffLine.style.opacity = "0";
+        }
+
+        slider.value = predictionDiff.toString();
+        if (hiddenInput) hiddenInput.value = predictionDiff.toString();
+
+        updateTeamVP();
+      }
+
+      // interactions
+
+      if (!isEditable) {
+        slider.disabled = true;
+        arrows.forEach((btn) => (btn.disabled = true));
+        milestones.forEach((btn) => (btn.disabled = true));
+        card.classList.add("is-locked");
+      } else {
+        slider.addEventListener("input", () => {
+          const v = parseInt(slider.value, 10);
+          if (!isNaN(v)) {
+            predictionDiff = v;
+            render();
+          }
+        });
+
+        arrows.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const step = parseInt(btn.dataset.step, 10) || 0;
+            predictionDiff += step;
+            render();
+          });
+        });
+
+        milestones.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const v = parseInt(btn.dataset.value, 10);
+            if (!isNaN(v)) {
+              predictionDiff = v;
+              render();
+            }
+          });
+        });
+      }
+
+      // finished pill → hook to boards modal
+      if (status === "final" && statusPill) {
+        statusPill.addEventListener("click", () => {
+          console.log("Show boards for this match");
+        });
+      }
+
+      render();
+    }
+  </script>
+</body>
+</html>
