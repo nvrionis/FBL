@@ -1,0 +1,2633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Bridge Match Cards</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* ========= THEME CONFIG – CHANGE ONLY THIS BLOCK WHEN THEMING ========= */
+    :root {
+      /* Page background */
+      --color-bg: #050608;
+      --color-bg-radial-top: rgba(255, 215, 130, 0.08);
+      --color-bg-radial-bottom: rgba(42, 209, 180, 0.08);
+
+      /* Card surfaces & borders */
+      --card-bg-main-1: #111318;
+      --card-bg-main-2: #0a0b10;
+      --card-bg-highlight: rgba(255, 255, 255, 0.04);
+      --card-border-soft: rgba(255, 255, 255, 0.04);
+      --card-border-strong: rgba(255, 255, 255, 0.18);
+      --card-shadow: 0 14px 36px rgba(0, 0, 0, 0.85);
+      --card-shadow-strong: 0 18px 40px rgba(0, 0, 0, 0.95);
+
+      /* Card glow overlays */
+      --card-glow-neutral: rgba(255, 215, 130, 0.08);
+      --card-lead-a-glow: rgba(42, 209, 180, 0.34);
+      --card-lead-b-glow: rgba(192, 132, 252, 0.34);
+
+      /* Typography */
+      --text-main: #f7f7ff;
+      --text-muted: #9ba0bf;
+      --text-gold: #ffd782;
+
+      /* Status label colors */
+      --status-pre: rgba(155, 160, 191, 0.9);
+      --status-live: #ff4b6b;
+      --status-final: var(--text-gold);
+
+      /* Team colors (left/right side) */
+      --team-a-color: #2ad1b4;
+      --team-b-color: #c084fc;
+      /* For glow in JS (R,G,B only) */
+      --team-a-glow-rgb: 42, 209, 180;
+      --team-b-glow-rgb: 192, 132, 252;
+
+      /* Slider colors */
+      --slider-neutral: rgba(255, 255, 255, 0.08);
+      --slider-bar-shadow-color: rgba(0, 0, 0, 0.7);
+      --slider-center-tick-color: rgba(255, 215, 130, 0.9);
+      --slider-tick-color: rgba(255, 255, 255, 0.26);
+      --slider-tick-zero-color: rgba(255, 215, 130, 0.98);
+
+      --slider-thumb-bg: #ffffff;
+      --slider-thumb-border: rgba(5, 6, 8, 0.95);
+
+      --slider-rest-shadow: 0 0 0 1px rgba(0, 0, 0, 0.7);
+      --slider-press-shadow: 0 0 14px rgba(0, 0, 0, 0.7);
+
+      /* Arrow buttons */
+      --arrow-bg-start: #14161e;
+      --arrow-bg-end: #08090e;
+      --arrow-border-color: rgba(255, 255, 255, 0.15);
+      --arrow-shadow: 0 6px 14px rgba(0, 0, 0, 0.85);
+
+      /* Bubble (numeric input) */
+      --bubble-bg-base: #050608;
+      --bubble-bg-overlay: rgba(255, 255, 255, 0.08);
+      --bubble-border: rgba(255, 255, 255, 0.16);
+      --bubble-shadow: 0 12px 24px rgba(0, 0, 0, 0.9);
+
+      /* Misc layout */
+      --card-radius: 16px;
+
+      /* Alias to keep JS happy (center bar neutral color) */
+      --neutral-color: var(--slider-neutral);
+
+      /* Unsaved border hint */
+      --unsaved-border: rgba(255, 215, 130, 0.55);
+
+      /* bottom sheet */
+      --bg-sheet: #10131a;
+      --bg-sheet-elevated: #151923;
+      --accent: #25d0b4;
+      --accent-soft: rgba(37, 208, 180, 0.15);
+      --border-soft-2: rgba(255, 255, 255, 0.08);
+      --border-strong-2: rgba(255, 255, 255, 0.14);
+      --danger: #ff4d6a;
+      --success: #3dd68c;
+      --warning: #ffb74d;
+      --radius-xl: 22px;
+      --radius-lg: 16px;
+      --radius-full: 999px;
+      --shadow-soft: 0 18px 40px rgba(0, 0, 0, 0.7);
+      --transition-fast: 180ms ease-out;
+
+      /* Gold gradient for player card border */
+      --gold-light: #f8e7b8;
+      --gold-mid: #d9a84e;
+      --gold-dark: #7b4b16;
+      --card-bg: #1a101f;
+
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      padding: 12px;
+      padding-bottom: 16px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top, var(--color-bg-radial-top), transparent 60%),
+        radial-gradient(circle at bottom, var(--color-bg-radial-bottom), transparent 55%),
+        var(--color-bg);
+      color: var(--text-main);
+    }
+
+    /* ========= PAGE HEADER & FILTERS ========= */
+
+    .page-header {
+      max-width: 420px;
+      margin: 0 auto 12px auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .page-title {
+      font-size: 0.9rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .filters-shell {
+      border-radius: 18px;
+      padding: 8px 10px;
+      background:
+        radial-gradient(circle at top, rgba(255,255,255,0.08), transparent 65%),
+        rgba(9, 11, 17, 0.96);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.75);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filters-top-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-tabs {
+      display: inline-flex;
+      border-radius: 999px;
+      background: rgba(7, 9, 14, 0.9);
+      padding: 2px;
+      gap: 2px;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .filter-tab {
+      flex: 1;
+      border: none;
+      border-radius: 999px;
+      padding: 4px 8px;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .filter-tab.active {
+      background:
+        radial-gradient(circle at top, rgba(255,215,130,0.18), transparent 65%),
+        linear-gradient(145deg, #1b1f2a, #11141e);
+      color: var(--text-gold);
+    }
+
+    /* Save button on top – clearly different from filter chips */
+    #saveButton.save-button-top {
+      border: none;
+      border-radius: 999px;
+      padding: 6px 14px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      cursor: pointer;
+      background: linear-gradient(135deg, #2ad1b4, #35efb7);
+      color: #020305;
+      box-shadow: 0 10px 26px rgba(0,0,0,0.95);
+    }
+
+    #saveButton.save-button-top:active {
+      transform: translateY(1px) scale(0.99);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.9);
+    }
+
+    .filters-bottom-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .filter-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .filter-options-group {
+      display: none;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      scrollbar-width: none;
+    }
+
+    .filter-options-group::-webkit-scrollbar {
+      display: none;
+    }
+
+    .filter-options-group.active {
+      display: flex;
+    }
+
+    .filter-option-chip {
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(15, 17, 24, 0.9);
+      color: var(--text-muted);
+      cursor: pointer;
+      outline: none;
+      white-space: nowrap;
+    }
+
+    .filter-option-chip.active {
+      border-color: rgba(255, 215, 130, 0.8);
+      color: var(--text-gold);
+      background:
+        radial-gradient(circle at top, rgba(255, 215, 130, 0.18), transparent 65%),
+        rgba(10, 12, 18, 0.95);
+    }
+
+    @media (min-width: 480px) {
+      body { padding: 16px; padding-bottom: 20px; }
+
+      .page-header {
+        max-width: 900px;
+      }
+
+      .filters-shell {
+        padding: 8px 12px;
+      }
+
+      .filters-top-row {
+        gap: 10px;
+      }
+
+      .filter-tab {
+        font-size: 0.7rem;
+      }
+
+      #saveButton.save-button-top {
+        font-size: 0.75rem;
+        padding-inline: 18px;
+      }
+    }
+
+    /* ========= CARDS LAYOUT ========= */
+
+    .matches-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 420px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 900px) {
+      .matches-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 380px));
+        gap: 16px 20px;
+        align-items: flex-start;
+        justify-content: center;
+        max-width: 900px;
+      }
+
+      .match-card {
+        margin-bottom: 0;
+      }
+    }
+
+    /* ========= CARD BASE ========= */
+
+    .match-card {
+      background:
+        radial-gradient(circle at top left, var(--card-bg-highlight), transparent 60%),
+        linear-gradient(145deg, var(--card-bg-main-1), var(--card-bg-main-2));
+      border-radius: var(--card-radius);
+      border: 1px solid var(--card-border-soft);
+      box-shadow:
+        var(--card-shadow),
+        0 0 0 0.5px rgba(255, 255, 255, 0.03);
+      padding: 10px 11px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+    }
+
+    .match-card.unsaved {
+      border-top: 2px solid var(--unsaved-border);
+    }
+
+    .match-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top right, var(--card-glow-neutral), transparent 55%);
+      opacity: 0;
+      transition: opacity 160ms ease-out;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .match-card.lead-a::before {
+      background: radial-gradient(circle at top left, var(--card-lead-a-glow), transparent 60%);
+      opacity: 1;
+    }
+
+    .match-card.lead-b::before {
+      background: radial-gradient(circle at top right, var(--card-lead-b-glow), transparent 60%);
+      opacity: 1;
+    }
+
+    .match-card.lead-a,
+    .match-card.lead-b {
+      border-color: var(--card-border-strong);
+      box-shadow:
+        var(--card-shadow-strong),
+        0 0 0 0.5px rgba(255, 255, 255, 0.05);
+    }
+
+    .match-meta-top {
+      font-size: 0.68rem;
+      font-weight: 500;
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .match-meta-top.prelive { color: var(--status-pre); }
+    .match-meta-top.live    { color: var(--status-live); }
+    .match-meta-top.final   { color: var(--status-final); }
+
+    /* ========= TEAMS + CENTER PREDICTION ========= */
+
+    .match-main-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.25fr) auto minmax(0, 1.25fr);
+      align-items: center;
+      gap: 6px;
+    }
+
+    .team { min-width: 0; }
+    .team-a { text-align: left; }
+    .team-b { text-align: right; }
+
+    .team-name {
+      font-size: 0.83rem;
+      font-weight: 650;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      cursor: pointer;
+    }
+
+    .team-name:hover {
+      text-decoration: underline;
+    }
+
+    .team-a .team-name { color: var(--team-a-color); }
+    .team-b .team-name { color: var(--team-b-color); }
+
+    .prediction-center {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .pred-value-row {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.05), transparent 70%);
+      min-width: 90px;
+    }
+
+    .pred-value-row::before {
+      content: "IMPS";
+      visibility: hidden;
+      font-size: 0.63rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .pred-value {
+      font-size: 1.45rem;
+      font-weight: 800;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      min-width: 28px;
+      text-align: center;
+    }
+
+    .pred-unit {
+      font-size: 0.63rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+    }
+
+    .pred-summary {
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+    }
+
+    .match-card.lead-a .pred-value { color: var(--team-a-color); }
+    .match-card.lead-b .pred-value { color: var(--team-b-color); }
+    .match-card.tie   .pred-value { color: var(--text-gold); }
+
+    /* ========= SLIDER ========= */
+
+    .prediction-slider { margin-top: 3px; }
+
+    .slider-row {
+      display: flex;
+      align-items: center;
+    }
+
+    .slider-wrapper {
+      position: relative;
+      flex: 1;
+      padding: 0 30px;
+    }
+
+    .center-tick {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      width: 2px;
+      height: 14px;
+      background: var(--slider-center-tick-color);
+      border-radius: 999px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .bar-shadow {
+      position: absolute;
+      left: 30px;
+      right: 30px;
+      top: 50%;
+      transform: translateY(7px);
+      height: 3px;
+      border-radius: 999px;
+      background: var(--slider-bar-shadow-color);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .imp-slider {
+      position: relative;
+      width: 100%;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--slider-neutral);
+      outline: none;
+      margin: 0;
+      z-index: 2;
+      box-shadow:
+        var(--slider-rest-shadow),
+        0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+      transition: box-shadow 0.12s ease-out, transform 0.12s ease-out;
+    }
+
+    .imp-slider:disabled {
+      opacity: 0.6;
+      box-shadow: var(--slider-rest-shadow);
+    }
+
+    .imp-slider.slider-pressed {
+      transform: scaleY(1.04);
+      box-shadow: var(--slider-press-shadow);
+    }
+
+    .imp-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--slider-thumb-bg);
+      border: 2px solid var(--slider-thumb-border);
+      box-shadow: var(--thumb-shadow);
+      cursor: pointer;
+      transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, background 0.12s ease-out;
+    }
+
+    .imp-slider:disabled::-webkit-slider-thumb {
+      cursor: default;
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+    }
+
+    .imp-slider:active::-webkit-slider-thumb { transform: scale(1.06); }
+
+    .imp-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--slider-thumb-bg);
+      border: 2px solid var(--slider-thumb-border);
+      box-shadow: var(--thumb-shadow);
+      cursor: pointer;
+      transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, background 0.12s ease-out;
+    }
+
+    .imp-slider:disabled::-moz-range-thumb {
+      cursor: default;
+      box-shadow:
+        0 0 0 1px rgba(0, 0, 0, 0.8),
+        0 0 0 1px rgba(255, 255, 255, 0.06) inset;
+    }
+
+    .imp-slider:active::-moz-range-thumb { transform: scale(1.06); }
+
+    .imp-slider::-moz-range-track {
+      height: 8px;
+      border-radius: 999px;
+      background: var(--slider-neutral);
+    }
+
+    .arrow-cap {
+      position: absolute;
+      top: 50%;
+      width: 30px;
+      height: 26px;
+      transform: translateY(-50%);
+      border: 1px solid var(--arrow-border-color);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffffff;
+      font-size: 0.85rem;
+      padding: 0;
+      transition: transform 0.08s ease-out, filter 0.12s ease-out, box-shadow 0.12s ease-out;
+      z-index: 3;
+      background:
+        radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 60%),
+        linear-gradient(145deg, var(--arrow-bg-start), var(--arrow-bg-end));
+      box-shadow: var(--arrow-shadow);
+    }
+
+    .arrow-left {
+      left: 0;
+      border-radius: 999px 0 0 999px;
+      border-right: none;
+      color: var(--team-a-color);
+    }
+
+    .arrow-right {
+      right: 0;
+      border-radius: 0 999px 999px 0;
+      border-left: none;
+      color: var(--team-b-color);
+    }
+
+    .arrow-cap:active {
+      transform: translateY(-50%) scale(0.94);
+      filter: brightness(1.08);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.8);
+    }
+
+    .arrow-cap.disabled {
+      opacity: 0.4;
+      cursor: default;
+      transform: translateY(-50%);
+      filter: none;
+      box-shadow: 0 0 0 rgba(0, 0, 0, 0.5);
+    }
+
+    .tick-row {
+      position: absolute;
+      left: 30px;
+      right: 30px;
+      top: calc(50% + 10px);
+      height: 10px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .tick {
+      position: absolute;
+      bottom: 0;
+      width: 2px;
+      height: 6px;
+      background: var(--slider-tick-color);
+      border-radius: 999px;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .tick-zero {
+      height: 8px;
+      background: var(--slider-tick-zero-color);
+    }
+
+    .tick-hit {
+      position: absolute;
+      bottom: 0;
+      width: 24px;
+      height: 16px;
+      transform: translateX(-50%);
+      cursor: pointer;
+      pointer-events: auto;
+    }
+
+    .tick-hit.disabled { pointer-events: none; }
+
+    .value-bubble {
+      position: absolute;
+      left: 50%;
+      top: -40px;
+      transform: translateX(-50%);
+      padding: 6px 8px;
+      border-radius: 8px;
+      background:
+        radial-gradient(circle at top, var(--bubble-bg-overlay), transparent 70%),
+        var(--bubble-bg-base);
+      color: #f9fafb;
+      font-size: 0.68rem;
+      display: none;
+      align-items: center;
+      gap: 4px;
+      z-index: 4;
+      box-shadow:
+        var(--bubble-shadow),
+        0 0 0 1px var(--bubble-border);
+    }
+
+    .value-bubble input {
+      width: 48px;
+      padding: 2px 4px;
+      border-radius: 4px;
+      border: 1px solid #4b5563;
+      background: var(--bubble-bg-base);
+      color: #f9fafb;
+      font-size: 0.68rem;
+      outline: none;
+      text-align: center;
+    }
+
+    .bubble-btn {
+      border: none;
+      border-radius: 4px;
+      padding: 2px 6px;
+      font-size: 0.63rem;
+      cursor: pointer;
+      background: rgba(255, 255, 255, 0.06);
+      color: #f9fafb;
+    }
+
+    .bubble-btn:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* ========= FINAL STATE LAYOUT ========= */
+
+    .final-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .final-header-row .team { max-width: 45%; }
+
+    .final-score-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1.2fr) auto minmax(0, 1.2fr);
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+    }
+
+    .team-score {
+      font-size: 0.74rem;
+      font-weight: 600;
+      color: var(--text-main);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .team-score-a { text-align: left;  color: var(--team-a-color); }
+    .team-score-b { text-align: right; color: var(--team-b-color); }
+
+    .final-score-middle {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      align-items: center;
+    }
+
+    .players-score-label {
+      font-size: 0.63rem;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+    }
+
+    .your-score-value {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text-gold);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .your-score-offset {
+      font-size: 0.63rem;
+      color: var(--text-muted);
+    }
+
+    @media (min-width: 480px) {
+      .match-card {
+        padding: 12px 14px 14px;
+        margin-bottom: 12px;
+      }
+      .team-name { font-size: 0.9rem; }
+      .pred-value { font-size: 1.55rem; }
+    }
+
+    /* Hide prediction summary for PRELIVE and LIVE */
+    .match-card[data-status="prelive"] .pred-summary,
+    .match-card[data-status="live"] .pred-summary {
+      display: none;
+    }
+
+    /* Make the finished card center block sit higher */
+    .match-card[data-status="final"] .final-score-row {
+      margin-top: 6px;
+      align-items: flex-start;
+    }
+
+    .match-card[data-status="final"] .final-score-middle {
+      align-self: flex-start;
+      gap: 0;
+      margin-top: -2px;
+    }
+
+    .match-card[data-status="final"] .your-score-offset {
+      font-size: 0.6rem;
+    }
+
+
+    /* ===== TEAM BOTTOM SHEET ===== */
+
+    .sheet-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--transition-fast);
+      z-index: 30;
+    }
+    .sheet-backdrop.visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    /* Bottom sheet container */
+    .bottom-sheet {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: -100vh;
+      height: 75vh;
+      background: radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 70%),
+        var(--bg-sheet);
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      box-shadow: var(--shadow-soft);
+      border-top: 1px solid rgba(255, 255, 255, 0.13);
+      transition: bottom var(--transition-fast), height var(--transition-fast);
+      z-index: 40;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .bottom-sheet.open {
+      bottom: 0;
+    }
+
+    .sheet-handle-area {
+      padding-top: 8px;
+      padding-bottom: 4px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .sheet-handle {
+      width: 44px;
+      height: 4px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.17);
+    }
+
+    .bottom-sheet-inner {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 6px 16px 16px;
+      gap: 10px;
+    }
+
+    .sheet-header {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      border-bottom: 1px solid var(--border-soft-2);
+      padding-bottom: 8px;
+    }
+
+    .sheet-title-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .sheet-title-main {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .sheet-team-name {
+      font-size: 18px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .sheet-team-pill {
+      display: none;
+    }
+
+    .sheet-team-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .sheet-close {
+      background: rgba(0, 0, 0, 0.35);
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-soft-2);
+      color: var(--text-main);
+      font-size: 18px;
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      padding: 0;
+    }
+    .sheet-close:hover {
+      border-color: var(--accent);
+    }
+
+    .sheet-tags {
+      display: none;
+    }
+
+    .sheet-body {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding-right: 4px;
+    }
+
+    /* Sections */
+    .section {
+      border-radius: var(--radius-lg);
+      background: var(--bg-sheet-elevated);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 10px 10px 8px;
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .section-pill {
+      font-size: 11px;
+      color: var(--accent);
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      background: var(--accent-soft);
+      border: 1px solid rgba(37, 208, 180, 0.5);
+    }
+
+    /* Pairs */
+    .pairs-list {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 6px;
+      font-size: 13px;
+    }
+
+    .pair-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 8px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .pair-left {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .pair-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .pair-players {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+    }
+
+    .player-chip {
+      border-radius: var(--radius-full);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      padding: 2px 8px;
+      font-size: 12px;
+      background: rgba(10, 16, 24, 0.9);
+      color: var(--text-main);
+      cursor: pointer;
+    }
+
+    .player-chip:hover {
+      border-color: var(--accent);
+      background: rgba(37, 208, 180, 0.12);
+    }
+
+    .pair-initials {
+      display: none;
+    }
+
+    /* Summary stats */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+      font-size: 12px;
+    }
+
+    .summary-card {
+      border-radius: 12px;
+      padding: 6px 8px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .summary-label {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .summary-value {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .summary-value.positive {
+      color: var(--success);
+    }
+
+    .summary-value.negative {
+      color: var(--danger);
+    }
+
+    /* Tabs + matches list inside sheet */
+    .tabs {
+      display: inline-flex;
+      padding: 2px;
+      border-radius: var(--radius-full);
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      margin-bottom: 8px;
+    }
+
+    .tab {
+      flex: 1;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-radius: var(--radius-full);
+      padding: 5px 10px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, var(--accent), #6ef2d8);
+      color: #020305;
+      font-weight: 600;
+    }
+
+    .matches-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* rename to avoid conflict with main .match-card */
+    .sheet-match-card {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 9px;
+      border-radius: 11px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 12px;
+    }
+
+    .sheet-match-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .sheet-match-opponent {
+      font-size: 13px;
+    }
+
+    .sheet-match-meta {
+      color: var(--text-muted);
+      font-size: 11px;
+    }
+
+    .sheet-match-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 3px;
+      text-align: right;
+    }
+
+    .match-status-pill {
+      font-size: 10px;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      border: 1px solid var(--border-soft-2);
+    }
+
+    .match-status-pill.final {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: var(--accent-soft);
+    }
+
+    .match-status-pill.live {
+      border-color: var(--warning);
+      color: var(--warning);
+      background: rgba(255, 183, 77, 0.16);
+    }
+
+    .match-status-pill.scheduled {
+      border-color: var(--border-soft-2);
+      color: var(--text-muted);
+    }
+
+    .sheet-match-score {
+      font-size: 13px;
+    }
+
+    .sheet-match-score.positive {
+      color: var(--success);
+    }
+
+    .sheet-match-score.negative {
+      color: var(--danger);
+    }
+
+    .empty-state {
+      font-size: 12px;
+      color: var(--text-muted);
+      padding: 6px 4px 2px;
+    }
+
+    @media (min-width: 768px) {
+      .bottom-sheet {
+        max-width: 480px;
+        left: 50%;
+        transform: translateX(-50%);
+      }
+    }
+
+    /* PLAYER INFO OVERLAY */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.78);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .35s ease;
+      z-index: 9999; /* above bottom sheet */
+    }
+
+    .overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .popup {
+      position: relative;
+      transform: scale(.9) translateY(16px);
+      opacity: 0;
+      transition: transform .35s cubic-bezier(.22,.61,.36,1), opacity .35s ease;
+    }
+
+    .overlay.open .popup {
+      transform: scale(1) translateY(0);
+      opacity: 1;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: -14px;
+      right: -14px;
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      border: none;
+      background: #222;
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 0 0 3px rgba(255,255,255,0.2);
+    }
+
+    .player-card {
+      width: min(380px, 90vw);
+      padding: 4px;
+      border-radius: 26px;
+      background: linear-gradient(135deg, var(--gold-light), var(--gold-mid), var(--gold-dark));
+      box-shadow: 0 18px 40px rgba(0,0,0,0.7);
+    }
+
+    .card-inner {
+      background: radial-gradient(circle at top, #52203e, var(--card-bg) 60%);
+      border-radius: 22px;
+      padding: 16px;
+    }
+
+    .player-photo-wrapper {
+      border-radius: 16px;
+      overflow: hidden;
+      border: 2px solid rgba(248, 231, 184, 0.55);
+      box-shadow: 0 8px 18px rgba(0,0,0,0.6);
+      height: 200px;
+      background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .player-photo {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .player-name {
+      margin: 12px 0 2px;
+      font-size: 22px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .nickname {
+      text-align: center;
+      font-size: 15px;
+      opacity: .75;
+      margin-bottom: 12px;
+    }
+
+    .special-skill {
+      text-align: center;
+      font-size: 14px;
+      margin-top: 4px;
+      opacity: .9;
+      color: #ffe88c;
+      font-weight: 600;
+    }
+
+    .content-row {
+      display: grid;
+      grid-template-columns: 1.2fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+    }
+
+    .stat-item {
+      background: rgba(0,0,0,0.28);
+      padding: 5px 8px;
+      border-radius: 8px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    #radarCanvas {
+      max-width: 100%;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="page-header">
+    <div class="page-title">Match predictions</div>
+
+    <!-- NEW FILTER + SAVE CONTAINER -->
+    <div class="filters-shell">
+      <div class="filters-top-row">
+        <div class="filter-tabs" id="filterTabs">
+          <button class="filter-tab active" data-filter-category="status">Status</button>
+          <button class="filter-tab" data-filter-category="day">Day</button>
+          <button class="filter-tab" data-filter-category="round">Round</button>
+          <button class="filter-tab" data-filter-category="team">Team</button>
+        </div>
+        <button id="saveButton" class="save-button-top">Save</button>
+      </div>
+
+      <div class="filters-bottom-row">
+        <div class="filter-label" id="filterActiveLabel">Status</div>
+
+        <!-- Status options -->
+        <div class="filter-options-group active" data-filter-category="status">
+          <button class="filter-option-chip active"
+                  data-filter-key="status"
+                  data-filter-value="all">All</button>
+          <button class="filter-option-chip"
+                  data-filter-key="status"
+                  data-filter-value="prelive">Upcoming</button>
+          <button class="filter-option-chip"
+                  data-filter-key="status"
+                  data-filter-value="live">Live</button>
+          <button class="filter-option-chip"
+                  data-filter-key="status"
+                  data-filter-value="final">Finished</button>
+        </div>
+
+        <!-- Day / Round / Team options will be populated via JS -->
+        <div class="filter-options-group" data-filter-category="day"></div>
+        <div class="filter-options-group" data-filter-category="round"></div>
+        <div class="filter-options-group" data-filter-category="team"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="matches" class="matches-grid"></div>
+  
+    <!-- Backdrop -->
+  <div class="sheet-backdrop" id="teamSheetBackdrop"></div>
+
+  <!-- Bottom sheet -->
+  <div class="bottom-sheet" id="teamSheet">
+    <div class="sheet-handle-area" id="sheetHandle">
+      <div class="sheet-handle"></div>
+    </div>
+    <div class="bottom-sheet-inner">
+      <!-- HEADER -->
+      <header class="sheet-header">
+        <div class="sheet-title-row">
+          <div class="sheet-title-main">
+            <div class="sheet-team-name">
+              <span id="sheetTeamName"></span>
+              <span class="sheet-team-pill" id="sheetTeamShort"></span>
+            </div>
+            <!-- Ρεκόρ = Wins-Ties-Losses (Ν-Ι-Η) -->
+            <div class="sheet-team-meta" id="sheetTeamMeta"></div>
+          </div>
+          <button class="sheet-close" id="sheetClose" aria-label="Close">×</button>
+        </div>
+        <div class="sheet-tags" id="sheetTeamTags"></div>
+      </header>
+
+      <div class="sheet-body">
+        <!-- PAIRS -->
+        <section class="section">
+          <div class="section-header">
+            <div class="section-title">Ζεύγη</div>
+            <span class="section-pill" id="pairsCount"></span>
+          </div>
+          <div class="pairs-list" id="pairsList"></div>
+        </section>
+
+        <!-- SUMMARY -->
+        <section class="section">
+          <div class="section-header">
+            <div class="section-title">Σύνοψη</div>
+          </div>
+          <div class="summary-grid">
+            <div class="summary-card">
+              <div class="summary-label">Ρεκόρ (Ν-Ι-Η)</div>
+              <div class="summary-value" id="summaryRecord">0-0-0</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">Διαφορά IMP</div>
+              <div class="summary-value" id="summaryImpDelta">+0</div>
+            </div>
+            <div class="summary-card">
+              <div class="summary-label">Σύνολο VP</div>
+              <div class="summary-value" id="summaryTotalVP">0.00</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- MATCHES -->
+        <section class="section">
+          <div class="section-header">
+            <div class="section-title">Αγώνες</div>
+          </div>
+          <div class="tabs">
+            <button class="tab active" data-tab="past">Ολοκληρωμένοι</button>
+            <button class="tab" data-tab="live">Σε εξέλιξη</button>
+            <button class="tab" data-tab="future">Επόμενοι</button>
+          </div>
+          <div class="matches-list" id="matchesList"></div>
+          <div class="empty-state" id="matchesEmptyState" style="display:none;">
+            Δεν υπάρχουν αγώνες σε αυτή την κατηγορία.
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+<!-- PLAYER POPUP OVERLAY -->
+<div class="overlay" id="playerOverlay">
+  <div class="popup">
+    <button class="close-btn" id="closePlayerPopup">&times;</button>
+
+    <div class="player-card">
+      <div class="card-inner">
+
+        <div class="player-photo-wrapper">
+          <img src="" class="player-photo" id="playerPhoto" />
+        </div>
+
+        <div class="player-name" id="playerName"></div>
+        <div class="nickname" id="playerNickname"></div>
+        <div class="special-skill" id="playerSpecialSkill"></div>
+
+        <div class="content-row">
+          <canvas id="radarCanvas" width="220" height="220"></canvas>
+          <div class="stats-grid" id="statsGrid"></div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+  <script type="module">
+    /* ========= SAMPLE DATA ========= */
+    
+    import {
+      matchesData,
+      teams,
+      WBF_12_WIN,
+      WBF_12_LOSS,
+      playersDb
+    } from './data.js';
+
+console.log("playersDb keys:", Object.keys(playersDb));
+        // ========= PLAYER OVERLAY =========
+
+    // 2. DOM refs (filled in initPlayerOverlay)
+    let playerOverlayEl,
+        closePlayerPopupBtn,
+        playerNameEl,
+        playerNicknameEl,
+        playerSpecialSkillEl,
+        playerPhotoEl,
+        statsGridEl,
+        radarCanvasEl,
+        radarCtx,
+        radarCx,
+        radarCy,
+        radarMaxRadius;
+
+    function initPlayerOverlay() {
+      playerOverlayEl       = document.getElementById("playerOverlay");
+      closePlayerPopupBtn   = document.getElementById("closePlayerPopup");
+      playerNameEl          = document.getElementById("playerName");
+      playerNicknameEl      = document.getElementById("playerNickname");
+      playerSpecialSkillEl  = document.getElementById("playerSpecialSkill");
+      playerPhotoEl         = document.getElementById("playerPhoto");
+      statsGridEl           = document.getElementById("statsGrid");
+      radarCanvasEl         = document.getElementById("radarCanvas");
+
+      if (!playerOverlayEl || !radarCanvasEl) return;
+
+      radarCtx       = radarCanvasEl.getContext("2d");
+      radarCx        = radarCanvasEl.width / 2;
+      radarCy        = radarCanvasEl.height / 2;
+      radarMaxRadius = 85;
+
+      // Close button
+      if (closePlayerPopupBtn) {
+        closePlayerPopupBtn.addEventListener("click", () => {
+          playerOverlayEl.classList.remove("open");
+        });
+      }
+
+      // Click outside card
+      playerOverlayEl.addEventListener("click", (e) => {
+        if (e.target === playerOverlayEl) {
+          playerOverlayEl.classList.remove("open");
+        }
+      });
+
+      // ESC to close
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          playerOverlayEl.classList.remove("open");
+        }
+      });
+    }
+
+    function drawPlayerRadar(stats) {
+      if (!radarCtx) return;
+      const N = stats.length;
+      radarCtx.clearRect(0, 0, radarCanvasEl.width, radarCanvasEl.height);
+
+      // grid
+      for (let lvl = 1; lvl <= 4; lvl++) {
+        const r = (radarMaxRadius / 4) * lvl;
+        radarCtx.beginPath();
+        radarCtx.strokeStyle = "rgba(255,255,255,0.18)";
+        for (let i = 0; i < N; i++) {
+          const ang = (Math.PI * 2 * i) / N - Math.PI / 2;
+          const x = radarCx + Math.cos(ang) * r;
+          const y = radarCy + Math.sin(ang) * r;
+          if (i === 0) radarCtx.moveTo(x, y);
+          else radarCtx.lineTo(x, y);
+        }
+        radarCtx.closePath();
+        radarCtx.stroke();
+      }
+
+      // polygon
+      radarCtx.beginPath();
+      radarCtx.strokeStyle = "rgba(0,255,240,0.9)";
+      radarCtx.fillStyle   = "rgba(0,255,240,0.25)";
+      stats.forEach((s, i) => {
+        const ang = (Math.PI * 2 * i) / N - Math.PI / 2;
+        const r   = radarMaxRadius * (s.value / 100);
+        const x   = radarCx + Math.cos(ang) * r;
+        const y   = radarCy + Math.sin(ang) * r;
+        if (i === 0) radarCtx.moveTo(x, y);
+        else radarCtx.lineTo(x, y);
+      });
+      radarCtx.closePath();
+      radarCtx.fill();
+      radarCtx.stroke();
+    }
+
+    function openPlayerCard(playerKey) {
+      if (!playerOverlayEl) return;
+      const p = playersDb[playerKey];
+      if (!p) {
+        alert("No data yet for player: " + playerKey);
+        return;
+      }
+
+      playerNameEl.textContent         = p.name;
+      playerNicknameEl.textContent     = p.nickname ? `"${p.nickname}"` : "";
+      playerSpecialSkillEl.textContent = p.specialSkill
+        ? "Special skill: " + p.specialSkill
+        : "";
+
+      if (p.photo) {
+        playerPhotoEl.src = p.photo;
+        playerPhotoEl.style.display = "block";
+      } else {
+        playerPhotoEl.removeAttribute("src");
+        playerPhotoEl.style.display = "none";
+      }
+
+      // stats list
+      statsGridEl.innerHTML = "";
+      p.stats.forEach(s => {
+        const div = document.createElement("div");
+        div.className = "stat-item";
+        div.innerHTML = `<span>${s.label}</span><strong>${s.value}</strong>`;
+        statsGridEl.appendChild(div);
+      });
+
+      drawPlayerRadar(p.stats);
+      playerOverlayEl.classList.add("open");
+    }
+
+
+    /* ========= FILTER STATE ========= */
+    const filtersState = {
+      status: "all",  // "all" | "prelive" | "live" | "final"
+      day: "all",     // "all" | "YYYY-MM-DD"
+      round: "all",   // "all" | "1" | "2" | ...
+      team: "all"     // "all" | team name
+    };
+
+    function convertImpsToVP12Boards(impDiff) {
+      const d = Math.abs(impDiff);
+      let idx = Math.round(d);
+      if (idx > 52) idx = 52;
+      return [WBF_12_WIN[idx], WBF_12_LOSS[idx]];
+    }
+
+    function vibrate(ms) {
+      if (navigator.vibrate) {
+        try { navigator.vibrate(ms); } catch (e) {}
+      }
+    }
+
+    function hexToRgb(hex) {
+      hex = hex.trim();
+      if (hex[0] === "#") hex = hex.slice(1);
+      if (hex.length === 3) {
+        hex = hex[0]+hex[0] + hex[1]+hex[1] + hex[2]+hex[2];
+      }
+      const num = parseInt(hex, 16);
+      return { r: (num >> 16) & 255, g: (num >> 8) & 255, b: num & 255 };
+    }
+
+    function getPercent(value, min, max) {
+      return ((value - min) / (max - min)) * 100;
+    }
+
+    function setCenterFillBackground(slider, value, intensity) {
+      const min = Number(slider.min);
+      const max = Number(slider.max);
+      const percent = getPercent(value, min, max);
+      const centerPercent = getPercent(0, min, max);
+
+      const styles = getComputedStyle(slider);
+      const neutral = styles.getPropertyValue("--neutral-color").trim();
+      const teamAHex = styles.getPropertyValue("--team-a-color").trim();
+      const teamBHex = styles.getPropertyValue("--team-b-color").trim();
+
+      if (value === 0) {
+        slider.style.background = neutral;
+        return;
+      }
+
+      const tInt = Math.max(0.25, 0.2 + 0.8 * intensity);
+
+      if (value < 0) {
+        const p = percent;
+        const rgb = hexToRgb(teamAHex);
+        const colorA = `rgba(${rgb.r},${rgb.g},${rgb.b},${tInt})`;
+        slider.style.background = `
+          linear-gradient(to right,
+            ${neutral} 0%,
+            ${neutral} ${p}%,
+            ${colorA} ${p}%,
+            ${colorA} ${centerPercent}%,
+            ${neutral} ${centerPercent}%,
+            ${neutral} 100%
+          )
+        `;
+      } else {
+        const p = percent;
+        const rgb = hexToRgb(teamBHex);
+        const colorB = `rgba(${rgb.r},${rgb.g},${rgb.b},${tInt})`;
+        slider.style.background = `
+          linear-gradient(to right,
+            ${neutral} 0%,
+            ${neutral} ${centerPercent}%,
+            ${colorB} ${centerPercent}%,
+            ${colorB} ${p}%,
+            ${neutral} ${p}%,
+            ${neutral} 100%
+          )
+        `;
+      }
+    }
+
+    /* ========= SMALL HELPERS ========= */
+
+    function getUiStatusFromMatch(match) {
+      if (match.status === "in_progress") return "live";
+      if (match.status === "final") return "final";
+      return "prelive"; // not_started or anything else
+    }
+
+    function markCardUnsaved(card) {
+      if ((card.dataset.status || "").toLowerCase() !== "prelive") return;
+      card.classList.add("unsaved");
+    }
+
+    /* ========= SLIDER INIT ========= */
+
+    function initCardSlider(card, slider, status, onValueChange) {
+      const wrapper      = card.querySelector(".slider-wrapper");
+      const tickRow      = card.querySelector(".tick-row");
+      const bubble       = card.querySelector(".value-bubble");
+      const bubbleInput  = card.querySelector(".bubble-input");
+      const bubbleOk     = card.querySelector(".bubble-ok");
+      const bubbleCancel = card.querySelector(".bubble-cancel");
+      const btnLeft      = card.querySelector(".arrow-left");
+      const btnRight     = card.querySelector(".arrow-right");
+      const rootElem     = document.documentElement;
+
+      if (!slider || !wrapper || !tickRow || !bubble || !bubbleInput || !bubbleOk || !bubbleCancel || !btnLeft || !btnRight) {
+        return;
+      }
+
+      const interactive = (status === "prelive");
+      const min = Number(slider.min);
+      const max = Number(slider.max);
+
+      let previousValue = Number(slider.value);
+      let pointerDown   = false;
+      let longPressTimer = null;
+
+      let repeatTimer = null;
+      let repeatDelayTimer = null;
+      let repeatStep = 0;
+
+      function update(fromUser = false) {
+        const value = Number(slider.value);
+        const absVal = Math.abs(value);
+        const intensity = absVal === 0 ? 0 : Math.min(1, absVal / max);
+
+        setCenterFillBackground(slider, value, intensity);
+
+        const rootStyles = getComputedStyle(rootElem);
+        let thumbColor = rootStyles.getPropertyValue("--slider-thumb-bg").trim() || "#ffffff";
+        let glowColor  = "rgba(0,0,0,0.85)";
+
+        if (value < 0) {
+          const rgb = rootStyles.getPropertyValue("--team-a-glow-rgb").trim() || "42,209,180";
+          thumbColor = rootStyles.getPropertyValue("--team-a-color").trim() || thumbColor;
+          glowColor  = `rgba(${rgb},${0.4 + 0.4 * intensity})`;
+        } else if (value > 0) {
+          const rgb = rootStyles.getPropertyValue("--team-b-glow-rgb").trim() || "192,132,252";
+          thumbColor = rootStyles.getPropertyValue("--team-b-color").trim() || thumbColor;
+          glowColor  = `rgba(${rgb},${0.4 + 0.4 * intensity})`;
+        }
+
+        rootElem.style.setProperty("--thumb-color", thumbColor);
+        rootElem.style.setProperty(
+          "--thumb-shadow",
+          `0 0 0 1px rgba(0,0,0,0.9), 0 0 ${8 + 10 * intensity}px ${glowColor}`
+        );
+
+        if (fromUser) {
+          if ((previousValue < 0 && value >= 0) || (previousValue > 0 && value <= 0)) {
+            vibrate(15);
+          }
+          if (value === min || value === max) {
+            vibrate(20);
+          }
+        }
+
+        previousValue = value;
+        if (onValueChange) onValueChange(value);
+      }
+
+      function step(delta, fromArrow = false) {
+        let v = Number(slider.value);
+        v += delta;
+        if (v < min) v = min;
+        if (v > max) v = max;
+        slider.value = v;
+        update(true);
+        if (fromArrow) vibrate(10);
+      }
+
+      function startRepeat(direction) {
+        stopRepeat();
+        repeatStep = direction;
+        step(repeatStep, true);
+
+        let delay = 400;
+        repeatDelayTimer = setTimeout(function run() {
+          step(repeatStep, true);
+          delay = Math.max(100, delay * 0.7);
+          repeatTimer = setTimeout(run, delay);
+        }, delay);
+      }
+
+      function stopRepeat() {
+        clearTimeout(repeatDelayTimer);
+        clearTimeout(repeatTimer);
+        repeatDelayTimer = null;
+        repeatTimer = null;
+        repeatStep = 0;
+      }
+
+      const tickValues = [];
+      for (let v = -50; v <= 50; v += 10) tickValues.push(v);
+
+      tickValues.forEach((val) => {
+        const percent = getPercent(val, min, max);
+
+        const hit = document.createElement("div");
+        hit.className = "tick-hit";
+        hit.style.left = percent + "%";
+
+        const tick = document.createElement("div");
+        tick.className = "tick";
+        if (val === 0) tick.classList.add("tick-zero");
+        tick.style.left = percent + "%";
+
+        if (interactive) {
+          hit.addEventListener("click", (e) => {
+            e.stopPropagation();
+            slider.value = val;
+            update(true);
+          });
+        } else {
+          hit.classList.add("disabled");
+        }
+
+        tickRow.appendChild(hit);
+        tickRow.appendChild(tick);
+      });
+
+      if (!interactive) {
+        slider.disabled = true;
+        btnLeft.classList.add("disabled");
+        btnRight.classList.add("disabled");
+        update(false);
+        return;
+      }
+
+      slider.addEventListener("input", () => update(true));
+
+      slider.addEventListener("pointerdown", () => {
+        pointerDown = true;
+        clearTimeout(longPressTimer);
+        longPressTimer = setTimeout(() => {
+          bubble.style.display = "flex";
+          bubbleInput.value = slider.value;
+          bubbleInput.focus();
+        }, 500);
+      });
+
+      slider.addEventListener("pointermove", () => {
+        if (pointerDown) clearTimeout(longPressTimer);
+      });
+
+      slider.addEventListener("pointerup", () => {
+        pointerDown = false;
+        clearTimeout(longPressTimer);
+
+        slider.classList.add("slider-pressed");
+        setTimeout(() => {
+          slider.classList.remove("slider-pressed");
+        }, 120);
+      });
+
+      slider.addEventListener("pointerleave", () => {
+        pointerDown = false;
+        clearTimeout(longPressTimer);
+      });
+
+      wrapper.addEventListener("click", (e) => {
+        if (
+          e.target === slider ||
+          e.target.closest(".arrow-cap") ||
+          e.target.closest(".value-bubble") ||
+          e.target.closest(".tick-hit")
+        ) return;
+
+        const rect = slider.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const ratio = x / rect.width;
+        const newValue = min + ratio * (max - min);
+        slider.value = Math.round(newValue);
+        update(true);
+      });
+
+      function closeBubble() { bubble.style.display = "none"; }
+
+      bubbleOk.addEventListener("click", () => {
+        let v = parseInt(bubbleInput.value, 10);
+        if (isNaN(v)) v = 0;
+        if (v < min) v = min;
+        if (v > max) v = max;
+        slider.value = v;
+        update(true);
+        closeBubble();
+      });
+
+      bubbleCancel.addEventListener("click", closeBubble);
+
+      bubbleInput.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") bubbleOk.click();
+        else if (e.key === "Escape") closeBubble();
+      });
+
+      btnLeft.addEventListener("mousedown", () => startRepeat(-1));
+      btnLeft.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        startRepeat(-1);
+      }, { passive: false });
+
+      btnLeft.addEventListener("mouseup", stopRepeat);
+      btnLeft.addEventListener("mouseleave", stopRepeat);
+      btnLeft.addEventListener("touchend", stopRepeat);
+
+      btnLeft.addEventListener("click", () => {
+        if (!repeatStep && !repeatTimer && !repeatDelayTimer) step(-1, true);
+      });
+
+      btnRight.addEventListener("mousedown", () => startRepeat(1));
+      btnRight.addEventListener("touchstart", (e) => {
+        e.preventDefault();
+        startRepeat(1);
+      }, { passive: false });
+
+      btnRight.addEventListener("mouseup", stopRepeat);
+      btnRight.addEventListener("mouseleave", stopRepeat);
+      btnRight.addEventListener("touchend", stopRepeat);
+
+      btnRight.addEventListener("click", () => {
+        if (!repeatStep && !repeatTimer && !repeatDelayTimer) step(1, true);
+      });
+
+      update(false);
+    }
+
+    /* ========= CARD INIT ========= */
+
+    function initMatchCard(card) {
+      const status = (card.dataset.status || "prelive").toLowerCase();
+
+      const slider = card.querySelector(".imp-slider");
+      const hiddenInput = card.querySelector(".imp-hidden-input");
+
+      const predValueEl   = card.querySelector(".pred-value");
+      const predUnitEl    = card.querySelector(".pred-unit");
+      const predSummaryEl = card.querySelector(".pred-summary");
+
+      const teamANameEl = card.querySelector(".team-a .team-name");
+      const teamBNameEl = card.querySelector(".team-b .team-name");
+
+      const teamALabel = teamANameEl ? teamANameEl.textContent.trim() : "Team A";
+      const teamBLabel = teamBNameEl ? teamBNameEl.textContent.trim() : "Team B";
+
+      const finalTeamScoreA = card.querySelector(".team-score-a");
+      const finalTeamScoreB = card.querySelector(".team-score-b");
+      const yourScoreEl     = card.querySelector(".your-score-value");
+      const offByEl         = card.querySelector(".your-score-offset");
+
+      const SLIDER_MIN = -52;
+      const SLIDER_MAX = 52;
+
+      function clamp(val) {
+        return Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, val));
+      }
+
+      let predictionDiff = 0;
+      if (card.dataset.predImp !== undefined && card.dataset.predImp !== "") {
+        const tmp = parseInt(card.dataset.predImp, 10);
+        if (!isNaN(tmp)) predictionDiff = tmp;
+      } else if (slider) {
+        const tmp = parseInt(slider.value, 10);
+        if (!isNaN(tmp)) predictionDiff = tmp;
+      }
+      predictionDiff = clamp(predictionDiff);
+
+      let actualDiff = null;
+      if (card.dataset.actualImp !== undefined && card.dataset.actualImp !== "") {
+        const tmp = parseInt(card.dataset.actualImp, 10);
+        if (!isNaN(tmp)) actualDiff = tmp;
+      }
+
+      function updateCardClasses(leadBasis) {
+        card.classList.remove("lead-a", "lead-b", "tie");
+        if (leadBasis < 0) card.classList.add("lead-a");
+        else if (leadBasis > 0) card.classList.add("lead-b");
+        else card.classList.add("tie");
+      }
+
+      function renderPrediction() {
+        if (!predValueEl || !predUnitEl || !predSummaryEl) return;
+
+        const abs = Math.abs(predictionDiff);
+        predValueEl.textContent = abs.toString();
+        predUnitEl.textContent  = "IMPs";
+
+        if (predictionDiff < 0) {
+          predSummaryEl.textContent = `${teamALabel} wins by ${abs} IMPs`;
+        } else if (predictionDiff > 0) {
+          predSummaryEl.textContent = `${teamBLabel} wins by ${abs} IMPs`;
+        } else {
+          predSummaryEl.textContent = "Tie (0 IMPs)";
+        }
+
+        if (hiddenInput) hiddenInput.value = predictionDiff.toString();
+        if (slider) slider.value = predictionDiff.toString();
+
+        const leadBasis = (actualDiff !== null ? actualDiff : predictionDiff);
+        updateCardClasses(leadBasis);
+      }
+
+      function renderFinal() {
+        if (actualDiff === null) return;
+
+        const absActual = Math.abs(actualDiff);
+        const [winnerVP, loserVP] = convertImpsToVP12Boards(absActual);
+
+        const t1Imps = card.dataset.scoreT1 ? parseInt(card.dataset.scoreT1, 10) : null;
+        const t2Imps = card.dataset.scoreT2 ? parseInt(card.dataset.scoreT2, 10) : null;
+
+        if (finalTeamScoreA && finalTeamScoreB) {
+          if (t1Imps !== null && t2Imps !== null) {
+            if (actualDiff === 0) {
+              const txt = `${winnerVP.toFixed(2)} VP (${t1Imps} IMPs)`;
+              finalTeamScoreA.textContent = txt;
+              finalTeamScoreB.textContent = txt;
+            } else if (actualDiff < 0) {
+              finalTeamScoreA.textContent =
+                `${winnerVP.toFixed(2)} VP (${t1Imps} IMPs)`;
+              finalTeamScoreB.textContent =
+                `${loserVP.toFixed(2)} VP (${t2Imps} IMPs)`;
+            } else {
+              finalTeamScoreA.textContent =
+                `${loserVP.toFixed(2)} VP (${t1Imps} IMPs)`;
+              finalTeamScoreB.textContent =
+                `${winnerVP.toFixed(2)} VP (${t2Imps} IMPs)`;
+            }
+          }
+        }
+
+        if (yourScoreEl) {
+          const diffError = Math.abs((actualDiff ?? 0) - (predictionDiff ?? 0));
+          const [, playerVP] = convertImpsToVP12Boards(diffError);
+          yourScoreEl.textContent = playerVP.toFixed(2);
+        }
+
+        if (offByEl) {
+          const diffError = Math.abs((actualDiff ?? 0) - (predictionDiff ?? 0));
+          offByEl.textContent = `Off by ${diffError} IMPs`;
+        }
+
+        updateCardClasses(actualDiff);
+      }
+
+      if (slider) {
+        initCardSlider(card, slider, status, (val) => {
+          predictionDiff = clamp(val);
+          card.dataset.predImp = predictionDiff.toString();
+          renderPrediction();
+
+          if (status === "prelive") {
+            markCardUnsaved(card);
+          }
+        });
+      }
+
+      if (status === "final") {
+        renderFinal();
+      } else {
+        renderPrediction();
+      }
+    }
+
+    /* ========= CARD CREATION ========= */
+
+    function createMatchCard(match) {
+      const boards = match.boards || 12;
+
+      const timeStr = (match.date_start || "").split(" ")[1]?.slice(0, 5) || "";
+      const dayStr  = (match.date_start || "").split(" ")[0] || "";
+      const roundStr = match.gyros ? `Round ${match.gyros}` : "Round";
+
+      let uiStatus = getUiStatusFromMatch(match);
+      let metaClass = uiStatus;
+      let metaText = `${roundStr} · ${timeStr}`;
+
+      if (uiStatus === "live") {
+        metaText = `${roundStr} · Live · ${timeStr}`;
+      } else if (uiStatus === "final") {
+        metaText = `${roundStr} · Finished · ${boards} boards`;
+      }
+
+      const predDiff = typeof match.player_prediction === "number"
+        ? match.player_prediction
+        : 0;
+
+      const score = Array.isArray(match.score) ? match.score : null;
+      let actualDiff = null;
+      if (score && score.length === 2 && uiStatus === "final") {
+        const t1 = Number(score[0]) || 0;
+        const t2 = Number(score[1]) || 0;
+        actualDiff = t2 - t1;
+      }
+
+      const card = document.createElement("div");
+      card.className = "match-card";
+      card.dataset.status = uiStatus;
+      card.dataset.predImp = String(predDiff);
+      card.dataset.matchId = String(match.id);
+      card.dataset.day = dayStr;
+      card.dataset.round = match.gyros ? String(match.gyros) : "";
+      card.dataset.teamA = match.t1_name;
+      card.dataset.teamB = match.t2_name;
+
+      if (actualDiff !== null) {
+        card.dataset.actualImp = String(actualDiff);
+      }
+      if (score && score.length === 2) {
+        card.dataset.scoreT1 = String(score[0]);
+        card.dataset.scoreT2 = String(score[1]);
+      }
+
+      if (uiStatus === "final") {
+        card.innerHTML = `
+          <div class="match-meta-top ${metaClass}">${metaText}</div>
+          <div class="match-main-row final-main-row">
+            <div class="team team-a">
+              <div class="team-name">${match.t1_name}</div>
+              <div class="team-score team-score-a">—</div>
+            </div>
+            <div class="prediction-center final-center">
+              <div class="players-score-label">Player score</div>
+              <div class="your-score-value">—</div>
+              <div class="your-score-offset">Off by — IMPs</div>
+            </div>
+            <div class="team team-b">
+              <div class="team-name">${match.t2_name}</div>
+              <div class="team-score team-score-b">—</div>
+            </div>
+          </div>
+        `;
+      } else {
+        card.innerHTML = `
+          <div class="match-meta-top ${metaClass}">${metaText}</div>
+          <div class="match-main-row">
+            <div class="team team-a">
+              <div class="team-name">${match.t1_name}</div>
+            </div>
+            <div class="prediction-center">
+              <div class="pred-value-row">
+                <span class="pred-value">0</span>
+                <span class="pred-unit">IMPs</span>
+              </div>
+              <div class="pred-summary">Tie (0 IMPs)</div>
+            </div>
+            <div class="team team-b">
+              <div class="team-name">${match.t2_name}</div>
+            </div>
+          </div>
+          <div class="prediction-slider">
+            <div class="slider-row">
+              <div class="slider-wrapper">
+                <div class="bar-shadow"></div>
+                <div class="center-tick"></div>
+                <button class="arrow-cap arrow-left" type="button">‹</button>
+                <button class="arrow-cap arrow-right" type="button">›</button>
+                <input
+                  class="imp-slider"
+                  type="range"
+                  min="-52"
+                  max="52"
+                  step="1"
+                  value="${predDiff}"
+                />
+                <div class="tick-row"></div>
+                <div class="value-bubble">
+                  <span>IMP</span>
+                  <input type="number" class="bubble-input" min="-99" max="99" />
+                  <button class="bubble-btn bubble-ok" type="button">OK</button>
+                  <button class="bubble-btn bubble-cancel" type="button">X</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <input type="hidden" class="imp-hidden-input" name="predicted_imp_diff" value="${predDiff}">
+        `;
+      }
+
+      return card;
+    }
+
+    /* ========= FILTER LOGIC ========= */
+
+    function matchPassesFilters(match) {
+      const uiStatus = getUiStatusFromMatch(match);
+      const dayStr = (match.date_start || "").split(" ")[0] || "";
+      const roundStr = match.gyros ? String(match.gyros) : "";
+      const teamNames = [match.t1_name, match.t2_name];
+
+      if (filtersState.status !== "all" && filtersState.status !== uiStatus) {
+        return false;
+      }
+
+      if (filtersState.day !== "all" && filtersState.day !== dayStr) {
+        return false;
+      }
+
+      if (filtersState.round !== "all" && filtersState.round !== roundStr) {
+        return false;
+      }
+
+      if (filtersState.team !== "all") {
+        const t = filtersState.team;
+        if (!teamNames.includes(t)) return false;
+      }
+
+      return true;
+    }
+
+    function createFilterChip(parent, label, value, key, isActive = false) {
+      const btn = document.createElement("button");
+      btn.className = "filter-option-chip";
+      if (isActive) btn.classList.add("active");
+      btn.textContent = label;
+      btn.dataset.filterKey = key;
+      btn.dataset.filterValue = value;
+
+      btn.addEventListener("click", () => {
+        const group = btn.closest(".filter-options-group");
+        group.querySelectorAll(".filter-option-chip").forEach(c => c.classList.remove("active"));
+        btn.classList.add("active");
+        filtersState[key] = value;
+        renderMatches();
+      });
+
+      parent.appendChild(btn);
+    }
+
+    function populateFilterOptions() {
+      const dayGroup   = document.querySelector('.filter-options-group[data-filter-category="day"]');
+      const roundGroup = document.querySelector('.filter-options-group[data-filter-category="round"]');
+      const teamGroup  = document.querySelector('.filter-options-group[data-filter-category="team"]');
+
+      const daySet   = new Set();
+      const roundSet = new Set();
+      const teamSet  = new Set();
+
+      matchesData.forEach((m) => {
+        const dayStr = (m.date_start || "").split(" ")[0] || "";
+        if (dayStr) daySet.add(dayStr);
+        if (m.gyros) roundSet.add(String(m.gyros));
+        if (m.t1_name) teamSet.add(m.t1_name);
+        if (m.t2_name) teamSet.add(m.t2_name);
+      });
+
+      // Days
+      createFilterChip(dayGroup, "All days", "all", "day", true);
+      Array.from(daySet).sort().forEach((day) => {
+        createFilterChip(dayGroup, day, day, "day");
+      });
+
+      // Rounds
+      createFilterChip(roundGroup, "All rounds", "all", "round", true);
+      Array.from(roundSet).sort((a, b) => Number(a) - Number(b)).forEach((r) => {
+        createFilterChip(roundGroup, `Round ${r}`, r, "round");
+      });
+
+      // Teams
+      createFilterChip(teamGroup, "All teams", "all", "team", true);
+      Array.from(teamSet).sort().forEach((name) => {
+        createFilterChip(teamGroup, name, name, "team");
+      });
+    }
+
+    /* ========= RENDERING ========= */
+
+    function renderMatches() {
+      const container = document.getElementById("matches");
+      container.innerHTML = "";
+
+      matchesData
+        .filter(matchPassesFilters)
+        .forEach((match) => {
+          const card = createMatchCard(match);
+          container.appendChild(card);
+          initMatchCard(card);
+
+          // NEW: clicking team names opens the team bottom sheet
+          const teamAEl = card.querySelector(".team-a .team-name");
+          const teamBEl = card.querySelector(".team-b .team-name");
+
+          if (teamAEl) {
+            teamAEl.style.cursor = "pointer";
+            teamAEl.addEventListener("click", (e) => {
+              e.stopPropagation();
+              openTeamSheet(match.t1_id);
+            });
+          }
+          if (teamBEl) {
+            teamBEl.style.cursor = "pointer";
+            teamBEl.addEventListener("click", (e) => {
+              e.stopPropagation();
+              openTeamSheet(match.t2_id);
+            });
+          }
+        });
+    }
+
+
+        /* ========= TEAM SHEET LOGIC ========= */
+
+    let currentTeamId = null;
+    let currentTab = "past";
+    let currentHeightMode = 1;
+
+    let sheet, sheetBackdrop, sheetHandle, sheetClose;
+    let sheetTeamName, sheetTeamShort, sheetTeamMeta, sheetTeamTags;
+    let pairsCountEl, pairsListEl;
+    let summaryRecordEl, summaryImpDeltaEl, summaryTotalVpEl;
+    let matchesListEl, matchesEmptyStateEl, tabButtons;
+
+    function getTeamById(id) {
+      return teams.find((t) => t.id === id);
+    }
+
+    function getMatchesByTeam(teamId) {
+      return matchesData.filter(m => m.t1_id === teamId || m.t2_id === teamId);
+    }
+
+    function formatDateShort(dtStr) {
+      if (!dtStr) return "";
+      const [datePart, timePart] = dtStr.split(" ");
+      const [y, m, d] = datePart.split("-");
+      const [hh, mm] = timePart.split(":");
+      return `${d}/${m} · ${hh}:${mm}`;
+    }
+
+    function categorizeMatches(teamId) {
+      const matches = getMatchesByTeam(teamId);
+      const result = { past: [], live: [], future: [] };
+      matches.forEach(m => {
+        if (m.status === "final") {
+          result.past.push(m);
+        } else if (m.status === "in_progress") {
+          result.live.push(m);
+        } else {
+          result.future.push(m);
+        }
+      });
+      return result;
+    }
+
+    function computeSummary(teamId) {
+      const matches = getMatchesByTeam(teamId);
+      let wins = 0, losses = 0, ties = 0;
+      let impDelta = 0;
+      let totalVp = 0;
+
+      matches.forEach(m => {
+        if (m.status !== "final" || !Array.isArray(m.score)) return;
+        const isT1 = m.t1_id === teamId;
+        const my = isT1 ? m.score[0] : m.score[1];
+        const opp = isT1 ? m.score[1] : m.score[0];
+        const diff = my - opp;
+
+        if (diff > 0) wins++;
+        else if (diff < 0) losses++;
+        else ties++;
+
+        impDelta += diff;
+
+        const [winVP, lossVP] = convertImpsToVP12Boards(diff);
+        const myVP = diff > 0 ? winVP : diff < 0 ? lossVP : winVP;
+        totalVp += myVP;
+      });
+
+      return {
+        wins,
+        losses,
+        ties,
+        impDelta,
+        totalMatches: matches.length,
+        totalVp
+      };
+    }
+
+    function getOppName(match, teamId) {
+      return match.t1_id === teamId ? match.t2_name : match.t1_name;
+    }
+
+    function getTeamPerspectiveScore(match, teamId) {
+      if (!Array.isArray(match.score)) return null;
+      const isT1 = match.t1_id === teamId;
+      const my = isT1 ? match.score[0] : match.score[1];
+      const opp = isT1 ? match.score[1] : match.score[0];
+      return { my, opp, diff: my - opp };
+    }
+
+    function onPlayerClick(playerName, team) {
+       console.log("Clicked player:", JSON.stringify(playerName));
+      // Use player name as key in playersDb
+      openPlayerCard(playerName);
+    }
+
+    function renderMatchesForCurrentTab() {
+      if (!currentTeamId) return;
+      const categorized = categorizeMatches(currentTeamId);
+      const matches = categorized[currentTab] || [];
+
+      matchesListEl.innerHTML = "";
+      if (!matches.length) {
+        matchesEmptyStateEl.style.display = "block";
+        return;
+      }
+      matchesEmptyStateEl.style.display = "none";
+
+      matches.forEach(m => {
+        const card = document.createElement("div");
+        card.className = "sheet-match-card";
+
+        const oppName = getOppName(m, currentTeamId);
+        const dateStr = formatDateShort(m.date_start);
+
+        let statusClass = "scheduled";
+        let statusText = "Προγραμματισμένος";
+        if (m.status === "final") {
+          statusClass = "final";
+          statusText = "Τελικό";
+        } else if (m.status === "in_progress") {
+          statusClass = "live";
+          statusText = "Σε εξέλιξη";
+        }
+
+        const scorePerspective = getTeamPerspectiveScore(m, currentTeamId);
+        let scoreHtml = "";
+        let scoreClass = "sheet-match-score";
+
+        if (scorePerspective) {
+          const { my, opp, diff } = scorePerspective;
+          scoreClass += diff > 0 ? " positive" : diff < 0 ? " negative" : "";
+
+          const [winVP, lossVP] = convertImpsToVP12Boards(diff);
+          const myVP = diff > 0 ? winVP : diff < 0 ? lossVP : winVP;
+
+          scoreHtml = `<div class="${scoreClass}">${my}-${opp} IMP · ${myVP.toFixed(2)} VP</div>`;
+        } else {
+          scoreHtml = `<div class="${scoreClass}">–</div>`;
+        }
+
+        card.innerHTML = `
+          <div class="sheet-match-main">
+            <div class="sheet-match-opponent">${oppName}</div>
+            <div class="sheet-match-meta">Γύρος ${m.gyros} · ${dateStr}</div>
+          </div>
+          <div class="sheet-match-right">
+            <span class="match-status-pill ${statusClass}">${statusText}</span>
+            ${scoreHtml}
+          </div>
+        `;
+        matchesListEl.appendChild(card);
+      });
+    }
+
+    function openTeamSheet(teamId) {
+      currentTeamId = teamId;
+      currentTab = "past";
+      currentHeightMode = 1;
+      sheet.style.height = "75vh";
+
+      const team = getTeamById(teamId);
+      const summary = computeSummary(teamId);
+
+      sheetTeamName.textContent = team.name;
+      sheetTeamShort.textContent = team.short;
+
+      sheetTeamMeta.textContent =
+        `Αγώνες: ${summary.totalMatches} · Ρεκόρ (Ν-Ι-Η): ${summary.wins}-${summary.ties}-${summary.losses}`;
+
+      // Pairs
+      pairsListEl.innerHTML = "";
+      pairsCountEl.textContent = `${team.pairs.length} ζεύγη`;
+      team.pairs.forEach(p => {
+        const row = document.createElement("div");
+        row.className = "pair-row";
+
+        const playersHtml = p.players
+          .map(name => `<button type="button" class="player-chip" data-player-name="${name}">${name}</button>`)
+          .join("");
+
+        row.innerHTML = `
+          <div class="pair-left">
+            <span class="pair-label">${p.label}</span>
+            <div class="pair-players">
+              ${playersHtml}
+            </div>
+          </div>
+          <div class="pair-initials">${team.short}</div>
+        `;
+
+        row.querySelectorAll(".player-chip").forEach(btn => {
+          btn.addEventListener("click", () => onPlayerClick(btn.dataset.playerName, team));
+        });
+
+        pairsListEl.appendChild(row);
+      });
+
+      // Summary
+      summaryRecordEl.textContent = `${summary.wins}-${summary.ties}-${summary.losses}`;
+      summaryImpDeltaEl.textContent = (summary.impDelta >= 0 ? "+" : "") + summary.impDelta;
+      summaryImpDeltaEl.classList.toggle("positive", summary.impDelta > 0);
+      summaryImpDeltaEl.classList.toggle("negative", summary.impDelta < 0);
+      summaryTotalVpEl.textContent = summary.totalVp.toFixed(2);
+
+      // Tabs active state
+      tabButtons.forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.tab === currentTab);
+      });
+
+      renderMatchesForCurrentTab();
+
+      sheet.classList.add("open");
+      sheetBackdrop.classList.add("visible");
+    }
+
+    function closeTeamSheet() {
+      currentTeamId = null;
+      sheet.classList.remove("open");
+      sheetBackdrop.classList.remove("visible");
+    }
+
+    function initTeamSheet() {
+      sheet = document.getElementById("teamSheet");
+      sheetBackdrop = document.getElementById("teamSheetBackdrop");
+      sheetHandle = document.getElementById("sheetHandle");
+      sheetClose = document.getElementById("sheetClose");
+
+      sheetTeamName = document.getElementById("sheetTeamName");
+      sheetTeamShort = document.getElementById("sheetTeamShort");
+      sheetTeamMeta = document.getElementById("sheetTeamMeta");
+      sheetTeamTags = document.getElementById("sheetTeamTags");
+      pairsCountEl = document.getElementById("pairsCount");
+      pairsListEl = document.getElementById("pairsList");
+      summaryRecordEl = document.getElementById("summaryRecord");
+      summaryImpDeltaEl = document.getElementById("summaryImpDelta");
+      summaryTotalVpEl = document.getElementById("summaryTotalVP");
+      matchesListEl = document.getElementById("matchesList");
+      matchesEmptyStateEl = document.getElementById("matchesEmptyState");
+      tabButtons = Array.from(document.querySelectorAll(".tab"));
+
+      sheetClose.addEventListener("click", closeTeamSheet);
+      sheetBackdrop.addEventListener("click", closeTeamSheet);
+
+      tabButtons.forEach(btn => {
+        btn.addEventListener("click", () => {
+          currentTab = btn.dataset.tab;
+          tabButtons.forEach(b => b.classList.toggle("active", b === btn));
+          renderMatchesForCurrentTab();
+        });
+      });
+
+      // tap handle to change height
+      sheetHandle.addEventListener("click", () => {
+        currentHeightMode = (currentHeightMode + 1) % 3;
+        if (currentHeightMode === 0) {
+          sheet.style.height = "60vh";
+        } else if (currentHeightMode === 1) {
+          sheet.style.height = "75vh";
+        } else {
+          sheet.style.height = "100vh";
+        }
+      });
+
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") closeTeamSheet();
+      });
+    }
+
+
+    /* ========= EVENT WIRING ========= */
+
+    document.addEventListener("DOMContentLoaded", () => {
+      populateFilterOptions();
+      initTeamSheet();
+      initPlayerOverlay();
+
+      // Category tabs (Status / Day / Round / Team)
+      const tabs = document.querySelectorAll(".filter-tab");
+      const groups = document.querySelectorAll(".filter-options-group");
+      const activeLabel = document.getElementById("filterActiveLabel");
+
+      tabs.forEach(tab => {
+        tab.addEventListener("click", () => {
+          const cat = tab.dataset.filterCategory;
+
+          tabs.forEach(t => t.classList.remove("active"));
+          tab.classList.add("active");
+
+          groups.forEach(g => {
+            g.classList.toggle("active", g.dataset.filterCategory === cat);
+          });
+
+          const labelText = cat.charAt(0).toUpperCase() + cat.slice(1);
+          activeLabel.textContent = labelText;
+        });
+      });
+
+      // Status chips already have markup – just add behaviour
+      document.querySelectorAll('.filter-options-group[data-filter-category="status"] .filter-option-chip')
+        .forEach(chip => {
+          chip.addEventListener("click", () => {
+            const group = chip.closest(".filter-options-group");
+            group.querySelectorAll(".filter-option-chip").forEach(c => c.classList.remove("active"));
+            chip.classList.add("active");
+
+            const value = chip.dataset.filterValue || "all";
+            filtersState.status = value;
+            renderMatches();
+          });
+        });
+
+      // SAVE BUTTON: persist predImp into matchesData.player_prediction
+      const saveBtn = document.getElementById("saveButton");
+      saveBtn.addEventListener("click", () => {
+        const cards = document.querySelectorAll(".match-card.unsaved");
+        cards.forEach(card => {
+          const id = Number(card.dataset.matchId);
+          const pred = Number(card.dataset.predImp || 0);
+          const m = matchesData.find(mm => mm.id === id);
+          if (m) {
+            m.player_prediction = pred;
+          }
+          card.classList.remove("unsaved");
+        });
+
+        console.log("Saved predictions:", matchesData.map(m => ({
+          id: m.id,
+          player_prediction: m.player_prediction
+        })));
+        alert("Predictions saved (stub).");
+      });
+
+      // Initial render
+      renderMatches();
+    });
+  </script>
+</body>
+</html>

@@ -436,3 +436,401 @@ export const WBF_12_LOSS = [
   1.72, 1.59, 1.46, 1.34, 1.22, 1.10, 0.98, 0.87, 0.76,
   0.66, 0.56, 0.46, 0.36, 0.26, 0.17, 0.08, 0.00
 ];
+
+export const playersDb = {
+  // --- ΚΡΙΤΣΑΛΗΣ ---
+  "ΚΡΙΤΣΑΛΗΣ Φ.": {
+    name: "ΚΡΙΤΣΑΛΗΣ Φ.",
+    nickname: "The Captain",
+    specialSkill: "Calm leadership on big swing boards.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 82 },
+      { label: "JUD",  value: 84 },
+      { label: "DECL", value: 86 },
+      { label: "DEF",  value: 83 },
+      { label: "CALM", value: 90 },
+      { label: "SYS",  value: 80 },
+      { label: "CREA", value: 78 },
+      { label: "GRIT", value: 88 }
+    ]
+  },
+  "ΣΚΟΡΔΑΣ Π.": {
+    name: "ΣΚΟΡΔΑΣ Π.",
+    nickname: "The Rock",
+    specialSkill: "Anchor defender who rarely guesses wrong.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 80 },
+      { label: "JUD",  value: 82 },
+      { label: "DECL", value: 81 },
+      { label: "DEF",  value: 84 },
+      { label: "CALM", value: 88 },
+      { label: "SYS",  value: 79 },
+      { label: "CREA", value: 76 },
+      { label: "GRIT", value: 86 }
+    ]
+  },
+  "ΠΑΠΑΣΠΥΡΟΥ Ι.": {
+    name: "ΠΑΠΑΣΠΥΡΟΥ Ι.",
+    nickname: "The Planner",
+    specialSkill: "Draws perfect declarer lines several tricks ahead.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 79 },
+      { label: "JUD",  value: 81 },
+      { label: "DECL", value: 83 },
+      { label: "DEF",  value: 80 },
+      { label: "CALM", value: 87 },
+      { label: "SYS",  value: 78 },
+      { label: "CREA", value: 77 },
+      { label: "GRIT", value: 84 }
+    ]
+  },
+  "ΣΟΥΜΠΛΗΣ Μ.": {
+    name: "ΣΟΥΜΠΛΗΣ Μ.",
+    nickname: "The Glue",
+    specialSkill: "Keeps partnerships stable and focused under pressure.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 78 },
+      { label: "JUD",  value: 80 },
+      { label: "DECL", value: 79 },
+      { label: "DEF",  value: 82 },
+      { label: "CALM", value: 85 },
+      { label: "SYS",  value: 77 },
+      { label: "CREA", value: 76 },
+      { label: "GRIT", value: 83 }
+    ]
+  },
+
+  // --- ΑΓΓΕΛΟΠΟΥΛΟΣ ---
+  "ΑΓΓΕΛΟΠΟΥΛΟΣ Π.": {
+    name: "ΑΓΓΕΛΟΠΟΥΛΟΣ Π.",
+    nickname: "The Aggressor",
+    specialSkill: "Sharp competitive bidding that punishes passive pairs.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 83 },
+      { label: "JUD",  value: 85 },
+      { label: "DECL", value: 84 },
+      { label: "DEF",  value: 82 },
+      { label: "CALM", value: 88 },
+      { label: "SYS",  value: 81 },
+      { label: "CREA", value: 79 },
+      { label: "GRIT", value: 87 }
+    ]
+  },
+  "ΜΠΑΛΟΚΑΣ Δ.": {
+    name: "ΜΠΑΛΟΚΑΣ Δ.",
+    nickname: "The Counterpuncher",
+    specialSkill: "Turns opponents’ overbids into big penalties.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 80 },
+      { label: "JUD",  value: 82 },
+      { label: "DECL", value: 81 },
+      { label: "DEF",  value: 83 },
+      { label: "CALM", value: 86 },
+      { label: "SYS",  value: 79 },
+      { label: "CREA", value: 77 },
+      { label: "GRIT", value: 85 }
+    ]
+  },
+  "ΛΕΦΑΣ Μ.": {
+    name: "ΛΕΦΑΣ Μ.",
+    nickname: "The Technician",
+    specialSkill: "Clean card play with almost no mechanical errors.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 79 },
+      { label: "JUD",  value: 81 },
+      { label: "DECL", value: 80 },
+      { label: "DEF",  value: 82 },
+      { label: "CALM", value: 86 },
+      { label: "SYS",  value: 78 },
+      { label: "CREA", value: 76 },
+      { label: "GRIT", value: 84 }
+    ]
+  },
+  "ΜΑΡΚΑΚΗΣ Ι.": {
+    name: "ΜΑΡΚΑΚΗΣ Ι.",
+    nickname: "The Calculator",
+    specialSkill: "Fast, accurate counting of shape and high cards.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 78 },
+      { label: "JUD",  value: 80 },
+      { label: "DECL", value: 79 },
+      { label: "DEF",  value: 81 },
+      { label: "CALM", value: 85 },
+      { label: "SYS",  value: 77 },
+      { label: "CREA", value: 75 },
+      { label: "GRIT", value: 83 }
+    ]
+  },
+
+  // --- ΔΟΞΙΑΔΗΣ ---
+  "ΔΟΞΙΑΔΗΣ Κ.": {
+    name: "ΔΟΞΙΑΔΗΣ Κ.",
+    nickname: "The Strategist",
+    specialSkill: "Builds long-term match plans, not just board-by-board.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 84 },
+      { label: "JUD",  value: 86 },
+      { label: "DECL", value: 85 },
+      { label: "DEF",  value: 83 },
+      { label: "CALM", value: 89 },
+      { label: "SYS",  value: 82 },
+      { label: "CREA", value: 80 },
+      { label: "GRIT", value: 88 }
+    ]
+  },
+  "ΡΟΥΣΣΟΣ Π.": {
+    name: "ΡΟΥΣΣΟΣ Π.",
+    nickname: "The Shadow",
+    specialSkill: "Reads declarer’s line and quietly kills side-suits.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 81 },
+      { label: "JUD",  value: 83 },
+      { label: "DECL", value: 82 },
+      { label: "DEF",  value: 84 },
+      { label: "CALM", value: 87 },
+      { label: "SYS",  value: 80 },
+      { label: "CREA", value: 78 },
+      { label: "GRIT", value: 86 }
+    ]
+  },
+  "ΦΙΛΙΟΣ Α.": {
+    name: "ΦΙΛΙΟΣ Α.",
+    nickname: "The Finisher",
+    specialSkill: "Closes thin contracts that others would go down in.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 80 },
+      { label: "JUD",  value: 82 },
+      { label: "DECL", value: 81 },
+      { label: "DEF",  value: 83 },
+      { label: "CALM", value: 86 },
+      { label: "SYS",  value: 79 },
+      { label: "CREA", value: 77 },
+      { label: "GRIT", value: 85 }
+    ]
+  },
+  "ΠΑΠΑΚΥΡΙΑΚΟΠΟΥΛΟΣ Γ.": {
+    name: "ΠΑΠΑΚΥΡΙΑΚΟΠΟΥΛΟΣ Γ.",
+    nickname: "The Analyst",
+    specialSkill: "Spots low-probability lines when the contract is in danger.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 79 },
+      { label: "JUD",  value: 81 },
+      { label: "DECL", value: 80 },
+      { label: "DEF",  value: 82 },
+      { label: "CALM", value: 85 },
+      { label: "SYS",  value: 78 },
+      { label: "CREA", value: 76 },
+      { label: "GRIT", value: 84 }
+    ]
+  },
+
+  // --- ΔΙΟΝΥΣΟΠΟΥΛΟΣ ---
+  "ΔΙΟΝΥΣΟΠΟΥΛΟΣ Δ.": {
+    name: "ΔΙΟΝΥΣΟΠΟΥΛΟΣ Δ.",
+    nickname: "The Director",
+    specialSkill: "Controls tempo and mood at the table perfectly.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 83 },
+      { label: "JUD",  value: 85 },
+      { label: "DECL", value: 84 },
+      { label: "DEF",  value: 86 },
+      { label: "CALM", value: 88 },
+      { label: "SYS",  value: 81 },
+      { label: "CREA", value: 79 },
+      { label: "GRIT", value: 87 }
+    ]
+  },
+  "ΜΠΟΖΕΜΠΕΡΓΚ Κ.": {
+    name: "ΜΠΟΖΕΜΠΕΡΓΚ Κ.",
+    nickname: "The Sniper",
+    specialSkill: "Precise leads that hit declarer’s weak spot.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 80 },
+      { label: "JUD",  value: 82 },
+      { label: "DECL", value: 81 },
+      { label: "DEF",  value: 83 },
+      { label: "CALM", value: 86 },
+      { label: "SYS",  value: 79 },
+      { label: "CREA", value: 77 },
+      { label: "GRIT", value: 85 }
+    ]
+  },
+  "ΖΩΤΟΣ Λ.": {
+    name: "ΖΩΤΟΣ Λ.",
+    nickname: "The Blocker",
+    specialSkill: "Excellent at preemptive bidding and disrupting auctions.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 79 },
+      { label: "JUD",  value: 81 },
+      { label: "DECL", value: 80 },
+      { label: "DEF",  value: 82 },
+      { label: "CALM", value: 85 },
+      { label: "SYS",  value: 78 },
+      { label: "CREA", value: 76 },
+      { label: "GRIT", value: 84 }
+    ]
+  },
+  "ΚΑΝΝΑΒΟΣ Π.": {
+    name: "ΚΑΝΝΑΒΟΣ Π.",
+    nickname: "The Pressure Player",
+    specialSkill: "Finds the extra trick exactly when the team needs it.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 78 },
+      { label: "JUD",  value: 80 },
+      { label: "DECL", value: 79 },
+      { label: "DEF",  value: 81 },
+      { label: "CALM", value: 84 },
+      { label: "SYS",  value: 77 },
+      { label: "CREA", value: 75 },
+      { label: "GRIT", value: 83 }
+    ]
+  },
+
+  // --- ΚΟΝΤΟΜΗΤΡΟΣ ---
+  "ΚΟΝΤΟΜΗΤΡΟΣ Κ.": {
+    name: "ΚΟΝΤΟΜΗΤΡΟΣ Κ.",
+    nickname: "The Quarterback",
+    specialSkill: "Calls the big game contracts at exactly the right time.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 83 },
+      { label: "JUD",  value: 85 },
+      { label: "DECL", value: 84 },
+      { label: "DEF",  value: 82 },
+      { label: "CALM", value: 88 },
+      { label: "SYS",  value: 81 },
+      { label: "CREA", value: 79 },
+      { label: "GRIT", value: 87 }
+    ]
+  },
+  "ΜΑΤΖΙΑΡΗΣ Α.": {
+    name: "ΜΑΤΖΙΑΡΗΣ Α.",
+    nickname: "The Architect",
+    specialSkill: "Builds strong, disciplined auctions around thin values.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 80 },
+      { label: "JUD",  value: 82 },
+      { label: "DECL", value: 81 },
+      { label: "DEF",  value: 83 },
+      { label: "CALM", value: 86 },
+      { label: "SYS",  value: 79 },
+      { label: "CREA", value: 77 },
+      { label: "GRIT", value: 85 }
+    ]
+  },
+  "ΜΠΑΝΙΚΑΣ Χ.": {
+    name: "ΜΠΑΝΙΚΑΣ Χ.",
+    nickname: "The Grinder",
+    specialSkill: "Collects small plus scores and almost never tilts.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 79 },
+      { label: "JUD",  value: 81 },
+      { label: "DECL", value: 80 },
+      { label: "DEF",  value: 82 },
+      { label: "CALM", value: 85 },
+      { label: "SYS",  value: 78 },
+      { label: "CREA", value: 76 },
+      { label: "GRIT", value: 84 }
+    ]
+  },
+  "ΠΑΠΑΓΙΑΝΝΗΣ Ι.": {
+    name: "ΠΑΠΑΓΙΑΝΝΗΣ Ι.",
+    nickname: "The Closer",
+    specialSkill: "Plays the last boards of a session like a final.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 78 },
+      { label: "JUD",  value: 80 },
+      { label: "DECL", value: 79 },
+      { label: "DEF",  value: 81 },
+      { label: "CALM", value: 84 },
+      { label: "SYS",  value: 77 },
+      { label: "CREA", value: 75 },
+      { label: "GRIT", value: 83 }
+    ]
+  },
+
+  // --- ΚΑΡΑΜΑΝΛΗΣ ---
+  "ΚΑΡΑΜΑΝΛΗΣ Φ.": {
+    name: "ΚΑΡΑΜΑΝΛΗΣ Φ.",
+    nickname: "The Oracle",
+    specialSkill: "Reads distributions frighteningly well from the auction.",
+    photo: "./images/players/karamanlis.jpg",
+    stats: [
+      { label: "BID",  value: 84 },
+      { label: "JUD",  value: 86 },
+      { label: "DECL", value: 85 },
+      { label: "DEF",  value: 83 },
+      { label: "CALM", value: 89 },
+      { label: "SYS",  value: 82 },
+      { label: "CREA", value: 80 },
+      { label: "GRIT", value: 88 }
+    ]
+  },
+  "ΚΟΥΚΟΥΣΕΛΗΣ Α.": {
+    name: "ΚΟΥΚΟΥΣΕΛΗΣ Α.",
+    nickname: "The Watcher",
+    specialSkill: "Spots every hesitation, carding clue and tempo change.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 81 },
+      { label: "JUD",  value: 83 },
+      { label: "DECL", value: 82 },
+      { label: "DEF",  value: 84 },
+      { label: "CALM", value: 87 },
+      { label: "SYS",  value: 80 },
+      { label: "CREA", value: 78 },
+      { label: "GRIT", value: 86 }
+    ]
+  },
+  "ΠΡΩΤΟΝΟΤΑΡΙΟΣ Μ.": {
+    name: "ΠΡΩΤΟΝΟΤΑΡΙΟΣ Μ.",
+    nickname: "The Surgeon",
+    specialSkill: "Cuts away losers with very precise technical play.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 80 },
+      { label: "JUD",  value: 82 },
+      { label: "DECL", value: 81 },
+      { label: "DEF",  value: 83 },
+      { label: "CALM", value: 86 },
+      { label: "SYS",  value: 79 },
+      { label: "CREA", value: 77 },
+      { label: "GRIT", value: 85 }
+    ]
+  },
+  "ΣΑΠΟΥΝΑΚΗΣ Α.": {
+    name: "ΣΑΠΟΥΝΑΚΗΣ Α.",
+    nickname: "The Gambler",
+    specialSkill: "Takes calculated shots when IMPs justify the risk.",
+    photo: "",
+    stats: [
+      { label: "BID",  value: 79 },
+      { label: "JUD",  value: 81 },
+      { label: "DECL", value: 80 },
+      { label: "DEF",  value: 82 },
+      { label: "CALM", value: 85 },
+      { label: "SYS",  value: 78 },
+      { label: "CREA", value: 76 },
+      { label: "GRIT", value: 84 }
+    ]
+  }
+};
