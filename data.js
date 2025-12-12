@@ -773,7 +773,7 @@ export const playersDb = {
     name: "ΚΑΡΑΜΑΝΛΗΣ Φ.",
     nickname: "The Oracle",
     specialSkill: "Reads distributions frighteningly well from the auction.",
-    photo: "./images/players/karamanlis.jpg",
+    photo: "",
     stats: [
       { label: "BID",  value: 84 },
       { label: "JUD",  value: 86 },
@@ -833,4 +833,197 @@ export const playersDb = {
       { label: "GRIT", value: 84 }
     ]
   }
+};
+
+
+// ---- LEADERBOARD USERS ----
+export const leaderboardUsers = [
+  {
+    userId: 1,
+    name: "You",
+    isYou: true
+  },
+  {
+    userId: 2,
+    name: "Kostas",
+    isYou: false
+  },
+  {
+    userId: 3,
+    name: "Maria",
+    isYou: false
+  }
+];
+
+
+// ---- LEADERBOARD PREDICTIONS ----
+// keyed by matchId
+export const leaderboardPredictions = {
+  // =============================
+  // Round 1 (gyros 1) – FINAL
+  // matches: 1, 2, 3
+  // =============================
+  1: [
+    {
+      userId: 1,
+      prediction: { winner: "B", diffImp: 0 },
+      playerVp: 6.47
+    },
+    {
+      userId: 2,
+      prediction: { winner: "B", diffImp: 10 },
+      playerVp: 7.69
+    },
+    {
+      userId: 3,
+      prediction: { winner: "B", diffImp: 10 },
+      playerVp: 7.69
+    }
+  ],
+  2: [
+    {
+      userId: 1,
+      prediction: { winner: "A", diffImp: 12 },
+      playerVp: 9.30
+    },
+    {
+      userId: 2,
+      prediction: { winner: "A", diffImp: 6 },
+      playerVp: 6.47
+    },
+    {
+      userId: 3,
+      prediction: { winner: "A", diffImp: 6 },
+      playerVp: 6.47
+    }
+  ],
+  3: [
+    {
+      userId: 1,
+      prediction: { winner: "B", diffImp: 5 },
+      playerVp: 5.54
+    },
+    {
+      userId: 2,
+      prediction: { winner: "B", diffImp: 8 },
+      playerVp: 7.10
+    },
+    {
+      userId: 3,
+      prediction: { winner: "B", diffImp: 8 },
+      playerVp: 7.10
+    }
+  ],
+
+  // =============================
+  // Round 4 (gyros 4) – LIVE
+  // matches: 10, 11, 12
+  // =============================
+  10: [
+    {
+      userId: 1,
+      prediction: { winner: "A", diffImp: 7 },
+      playerVp: null
+    },
+    {
+      userId: 2,
+      prediction: { winner: "A", diffImp: 3 },
+      playerVp: null
+    },
+    {
+      userId: 3,
+      prediction: { winner: "A", diffImp: 3 },
+      playerVp: null
+    }
+  ],
+  11: [
+    {
+      userId: 1,
+      prediction: { winner: "B", diffImp: 4 },
+      playerVp: null
+    },
+    {
+      userId: 2,
+      prediction: { winner: "B", diffImp: 9 },
+      playerVp: null
+    },
+    {
+      userId: 3,
+      prediction: { winner: "B", diffImp: 9 },
+      playerVp: null
+    }
+  ],
+  12: [
+    {
+      userId: 1,
+      prediction: { winner: "A", diffImp: 10 },
+      playerVp: null
+    },
+    {
+      userId: 2,
+      prediction: { winner: "B", diffImp: 2 },
+      playerVp: null
+    },
+    {
+      userId: 3,
+      prediction: { winner: "B", diffImp: 2 },
+      playerVp: null
+    }
+  ],
+
+  // =============================
+  // Round 6 (gyros 6) – PRE-LIVE
+  // matches: 16, 17, 18
+  // =============================
+  16: [
+    {
+      userId: 1,
+      prediction: { winner: "B", diffImp: 8 },
+      playerVp: null
+    },
+    {
+      userId: 2,
+      prediction: { winner: "B", diffImp: 5 },
+      playerVp: null
+    },
+    {
+      userId: 3,
+      prediction: { winner: "B", diffImp: 5 },
+      playerVp: null
+    }
+  ],
+  17: [
+    {
+      userId: 1,
+      prediction: { winner: "A", diffImp: 6 },
+      playerVp: null
+    },
+    {
+      userId: 2,
+      prediction: { winner: "A", diffImp: 9 },
+      playerVp: null
+    },
+    {
+      userId: 3,
+      prediction: { winner: "A", diffImp: 9 },
+      playerVp: null
+    }
+  ],
+  18: [
+    {
+      userId: 1,
+      prediction: { winner: "B", diffImp: 4 },
+      playerVp: null
+    },
+    {
+      userId: 2,
+      prediction: { winner: "A", diffImp: 3 },
+      playerVp: null
+    },
+    {
+      userId: 3,
+      prediction: { winner: "B", diffImp: 4 },
+      playerVp: null
+    }
+  ]
 };
