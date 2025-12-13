@@ -773,7 +773,7 @@ export const playersDb = {
     name: "ΚΑΡΑΜΑΝΛΗΣ Φ.",
     nickname: "The Oracle",
     specialSkill: "Reads distributions frighteningly well from the auction.",
-    photo: "",
+    photo: "./images/karamanlis.jpg",
     stats: [
       { label: "BID",  value: 84 },
       { label: "JUD",  value: 86 },
